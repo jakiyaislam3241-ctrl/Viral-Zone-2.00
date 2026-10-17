@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BD VIRAL - Admin Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #07040d;
+            --card-bg: rgba(23, 14, 38, 0.85);
+            --border-purple: rgba(168, 85, 247, 0.3);
+            --primary-purple: #a855f7;
+            --purple-glow: #9333ea;
+            --text-main: #f3e8ff;
+            --text-dim: #c4b5fd;
+            --danger-red: #ef4444;
+            --success: #22c55e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top, #1c0836 0%, var(--bg-color) 80%);
+            color: var(--text-main); min-height: 100vh; padding: 20px 14px 40px;
+        }
+        .auth-card, .admin-card {
+            background: var(--card-bg); border: 1px solid var(--border-purple);
+            border-radius: 20px; padding: 22px; width: 100%; max-width: 520px;
+            margin: 0 auto 18px; box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
+            backdrop-filter: blur(12px);
+        }
+        .auth-card { margin-top: 7vh; max-width: 420px; }
+        h2 {
+            font-size: 18px; margin-bottom: 16px; color: var(--primary-purple);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+        input {
+            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-purple); border-radius: 10px;
+            color: white; font-size: 14px; outline: none;
+        }
+        input:focus { border-color: var(--primary-purple); }
+        .btn {
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, var(--primary-purple), var(--purple-glow));
+            border: none; border-radius: 10px; color: white; font-weight: bold;
+            cursor: pointer; font-size: 14px;
+        }
+        .btn:active { transform: scale(.99); }
+        .btn-danger {
+            background: var(--danger-red); padding: 7px 10px;
+            border-radius: 7px; font-size: 11px; border: none; color: white; cursor: pointer;
+        }
+        .btn-small {
+            background: rgba(168,85,247,.18); border: 1px solid var(--border-purple);
+            padding: 7px 10px; border-radius: 7px; color: white; font-size: 11px; cursor: pointer;
+        }
+        .video-item {
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            padding: 11px; background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(168,85,247,.12); border-radius: 10px; margin-bottom: 8px;
+        }
+        .video-meta { min-width: 0; overflow-wrap: anywhere; }
+        .video-meta strong { display: block; font-size: 13px; margin-bottom: 4px; }
+        .video-meta small { color: var(--text-dim); font-size: 11px; }
+        .video-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        #admin-panel-content { display: none; }
+        .topbar {
+            max-width: 520px; margin: 0 auto 16px; display: flex;
+            justify-content: space-between; align-items: center; gap: 10px;
+        }
+        .brand { font-weight: 800; font-size: 18px; background: linear-gradient(90deg,#fff,#c084fc);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logout { border: 1px solid var(--border-purple); color: #e9d5ff; background: #190d2a;
+            padding: 8px 11px; border-radius: 8px; cursor: pointer; }
+        .notice { font-size: 12px; line-height: 1.6; color: var(--text-dim); margin-top: 12px; }
+        .status { min-height: 18px; margin-top: 10px; font-size: 12px; }
+        .status.success { color: var(--success); }
+        .status.error { color: #fca5a5; }
+        .empty { color: #b6a6cb; font-size: 12px; text-align: center; padding: 16px 4px; }
+        @media (max-width: 380px) {
+            body { padding-left: 10px; padding-right: 10px; }
+            .admin-card, .auth-card { padding: 17px; }
+            .video-item { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card" id="auth-screen">
+        <h2><i class="fa-solid fa-lock"></i> Admin Verification</h2>
+        <div class="form-group">
+            <label for="passcode">এডমিন পিন কোড লিখুন:</label>
+            <input type="password" id="passcode" placeholder="ডেমো PIN: 1234" autocomplete="current-password">
+        </div>
+        <button class="btn" id="login-btn" type="button"><i class="fa-solid fa-right-to-bracket"></i> Login to Admin Panel</button>
+        <p class="notice">এটি একটি HTML ডেমো। বাস্তব সাইটে নিরাপদ লগইনের জন্য সার্ভার-সাইড authentication ব্যবহার করুন।</p>
+        <div id="login-status" class="status" role="status"></div>
+    </div>
+
+    <div id="admin-panel-content">
+        <div class="topbar">
+            <div class="brand"><i class="fa-solid fa-shield-halved"></i> BD VIRAL ADMIN</div>
+            <button class="logout" id="logout-btn" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+
+        <section class="admin-card">
+            <h2><i class="fa-solid fa-gears"></i> Monetization Settings</h2>
+            <div class="form-group">
+                <label for="ad-url-input">Direct Ad Link:</label>
+                <input type="url" id="ad-url-input" placeholder="https://example.com">
+            </div>
+            <div class="form-group">
+                <label for="ad-timer-input">Ad Timer Duration (Seconds):</label>
+                <input type="number" id="ad-timer-input" min="1" max="300" step="1">
+            </div>
+            <button class="btn" id="save-settings-btn" type="button">Save Settings</button>
+            <div id="settings-status" class="status" role="status"></div>
+        </section>
+
+        <section class="admin-card">
+            <h2><i class="fa-solid fa-square-plus"></i> Add New Video</h2>
+            <div class="form-group">
+                <label for="v-title">Video Title:</label>
+                <input type="text" id="v-title" maxlength="180" placeholder="ভিডিওর শিরোনাম">
+            </div>
+            <div class="form-group">
+                <label for="v-thumb">Thumbnail Image URL:</label>
+                <input type="url" id="v-thumb" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group">
+                <label for="v-url">Video File URL (.mp4):</label>
+                <input type="url" id="v-url" placeholder="https://example.com/video.mp4">
+            </div>
+            <button class="btn" id="add-video-btn" type="button">Add Video</button>
+            <div id="video-form-status" class="status" role="status"></div>
+        </section>
+
+        <section class="admin-card">
+            <h2><i class="fa-solid fa-list"></i> Manage Videos <span id="video-count" style="font-size:12px;color:var(--text-dim);font-weight:400;"></span></h2>
+            <div id="video-manage-list"></div>
+        </section>
+    </div>
+
+    <script>
+        const DEMO_PIN = "1234";
+        const STORAGE_KEY = "bd_viral_admin_demo_data";
+
+        // Public HTML should never contain a JSONBin Master Key.
+        // Connect this interface to a protected backend for cloud storage.
+        let cloudData = {
+            adLink: "https://telegram.org",
+            adTimer: 10,
+            videos: []
+        };
+
+        const byId = id => document.getElementById(id);
+
+        function setStatus(id, message, type = "") {
+            const el = byId(id);
+            el.textContent = message;
+            el.className = "status" + (type ? " " + type : "");
+        }
+
+        function safeUrl(value) {
+            try {
+                const url = new URL(value);
+                return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+            } catch (_) {
+                return "";
+            }
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    cloudData = {
+                        adLink: typeof parsed.adLink === "string" ? parsed.adLink : "https://telegram.org",
+                        adTimer: Number.isFinite(Number(parsed.adTimer)) ? Number(parsed.adTimer) : 10,
+                        videos: Array.isArray(parsed.videos) ? parsed.videos : []
+                    };
+                }
+            } catch (error) {
+                console.warn("Could not read saved demo data.", error);
+            }
+        }
+
+        function persistData(statusId) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData));
+                if (statusId) setStatus(statusId, "সেটিংস এই ব্রাউজারে সেভ হয়েছে।", "success");
+            } catch (error) {
+                if (statusId) setStatus(statusId, "সেভ করা যায়নি। ব্রাউজারের storage পরীক্ষা করুন।", "error");
+            }
+        }
+
+        function verifyPin() {
+            if (byId("passcode").value === DEMO_PIN) {
+                byId("auth-screen").style.display = "none";
+                byId("admin-panel-content").style.display = "block";
+                byId("ad-url-input").value = cloudData.adLink;
+                byId("ad-timer-input").value = cloudData.adTimer;
+                renderVideoList();
+            } else {
+                setStatus("login-status", "PIN সঠিক নয়। আবার চেষ্টা করুন।", "error");
+            }
+        }
+
+        function logout() {
+            byId("admin-panel-content").style.display = "none";
+            byId("auth-screen").style.display = "block";
+            byId("passcode").value = "";
+            setStatus("login-status", "", "");
+        }
+
+        function saveSettings() {
+            const url = safeUrl(byId("ad-url-input").value.trim());
+            const timer = Number(byId("ad-timer-input").value);
+            if (!url) {
+                setStatus("settings-status", "একটি বৈধ http/https Ad Link দিন।", "error");
+                return;
+            }
+            if (!Number.isInteger(timer) || timer < 1 || timer > 300) {
+                setStatus("settings-status", "টাইমার ১ থেকে ৩০০ সেকেন্ডের মধ্যে দিন।", "error");
+                return;
+            }
+            cloudData.adLink = url;
+            cloudData.adTimer = timer;
+            persistData("settings-status");
+        }
+
+        function addNewVideo() {
+            const title = byId("v-title").value.trim();
+            const thumb = safeUrl(byId("v-thumb").value.trim());
+            const url = safeUrl(byId("v-url").value.trim());
+
+            if (!title) {
+                setStatus("video-form-status", "ভিডিওর শিরোনাম লিখুন।", "error");
+                return;
+            }
+            if (!thumb || !url) {
+                setStatus("video-form-status", "সঠিক Thumbnail URL এবং Video URL দিন।", "error");
+                return;
+            }
+
+            cloudData.videos.unshift({
+                id: Date.now(),
+                title,
+                thumb,
+                url,
+                views: "0"
+            });
+            persistData();
+            renderVideoList();
+            byId("v-title").value = "";
+            byId("v-thumb").value = "";
+            byId("v-url").value = "";
+            setStatus("video-form-status", "ভিডিও যোগ হয়েছে (এই ব্রাউজারের ডেমো ডেটায়)।", "success");
+        }
+
+        function deleteVideo(id) {
+            const video = cloudData.videos.find(item => Number(item.id) === Number(id));
+            if (!video) return;
+            if (!confirm(`"${video.title}" ভিডিওটি মুছে ফেলবেন?`)) return;
+            cloudData.videos = cloudData.videos.filter(item => Number(item.id) !== Number(id));
+            persistData();
+            renderVideoList();
+        }
+
+        function renderVideoList() {
+            const container = byId("video-manage-list");
+            byId("video-count").textContent = `(${cloudData.videos.length})`;
+            if (!cloudData.videos.length) {
+                container.innerHTML = '<div class="empty">এখনো কোনো ভিডিও যোগ করা হয়নি।</div>';
+                return;
+            }
+            container.replaceChildren();
+            cloudData.videos.forEach(video => {
+                const item = document.createElement("div");
+                item.className = "video-item";
+
+                const meta = document.createElement("div");
+                meta.className = "video-meta";
+                const title = document.createElement("strong");
+                title.textContent = video.title || "শিরোনাম নেই";
+                const detail = document.createElement("small");
+                detail.textContent = "ID: " + String(video.id);
+                meta.append(title, detail);
+
+                const actions = document.createElement("div");
+                actions.className = "video-actions";
+                const view = document.createElement("button");
+                view.className = "btn-small";
+                view.type = "button";
+                view.textContent = "Open";
+                view.addEventListener("click", () => {
+                    const url = safeUrl(video.url || "");
+                    if (url) window.open(url, "_blank", "noopener,noreferrer");
+                });
+
+                const remove = document.createElement("button");
+                remove.className = "btn-danger";
+                remove.type = "button";
+                remove.textContent = "Delete";
+                remove.addEventListener("click", () => deleteVideo(video.id));
+
+                actions.append(view, remove);
+                item.append(meta, actions);
+                container.append(item);
+            });
+        }
+
+        byId("login-btn").addEventListener("click", verifyPin);
+        byId("passcode").addEventListener("keydown", event => {
+            if (event.key === "Enter") verifyPin();
+        });
+        byId("logout-btn").addEventListener("click", logout);
+        byId("save-settings-btn").addEventListener("click", saveSettings);
+        byId("add-video-btn").addEventListener("click", addNewVideo);
+
+        loadData();
+        if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.expand();
+    </script>
+</body>
+</html>
