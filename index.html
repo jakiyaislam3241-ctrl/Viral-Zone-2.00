@@ -170,7 +170,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Telegram Mini App Initialization
     const tg = window.Telegram?.WebApp;
     if (tg) tg.ready();
 
@@ -197,7 +196,16 @@
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
+    // Realtime Database Listener with Safety Timeout
     const videoRef = ref(db, 'videos');
+    
+    setTimeout(() => {
+      const feed = document.getElementById('mainFeed');
+      if (globalVideos.length === 0 && feed.innerHTML.includes("Loading Videos...")) {
+        feed.innerHTML = '<div class="status-msg">No videos found or connection timeout! Please check Firebase Rules.</div>';
+      }
+    }, 5000);
+
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
       globalVideos = [];
@@ -207,6 +215,9 @@
         });
       }
       renderAppFeed(globalVideos);
+    }, (error) => {
+      console.error(error);
+      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase rules!</div>';
     });
 
     function renderAppFeed(videos) {
@@ -218,7 +229,6 @@
       feed.innerHTML = '';
       videos.forEach((vid, idx) => {
         const partsCount = vid.parts ? vid.parts.length : 1;
-        // Fix Thumbnail rendering with comprehensive fallback keys
         const thumbUrl = vid.thumbnail || vid.thumb || vid.img || vid.image || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
         const views = vid.views || 0;
 
@@ -316,7 +326,6 @@
       window.open(adUrl, '_blank');
     };
 
-    // Strict Timer & Telegram Bot Integration Check
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -325,7 +334,6 @@
 
         if (timeSpent < requiredTime) {
           let remaining = requiredTime - timeSpent;
-          // Exact Screenshot Alert Dialogue Notice Format
           document.getElementById('noticeMsg').innerText = `⚠️ You must wait full ${requiredTime} seconds on the link. ${remaining}s remaining.`;
           document.getElementById('noticeModal').style.display = 'flex';
         } else {
@@ -335,20 +343,12 @@
             document.getElementById('noticeMsg').innerText = `✅ Ads ${adsCountWatched} viewed! Please watch ${left} more ads to unlock.`;
             document.getElementById('noticeModal').style.display = 'flex';
           } else {
-            // Success: Send Video to New Telegram Bot via Telegram API
             hideModal('unlockModal');
 
-            const userId = tg?.initDataUnsafe?.user?.id || "6489017273"; // Fallback chat ID if test browser
+            const userId = tg?.initDataUnsafe?.user?.id || "6489017273";
             const messageText = `🎬 *${activeVideo.title}* [Part ${selectedPartIndex + 1}]\n\n🔗 Video Link: ${selectedPartUrl}\n\n💬 Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
 
-            // Telegram Bot API Request to send message directly to user inbox
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: userId,
-                text: messageText,
-                parse_mode: 'Markdown'
-              })
-            })
-            .then(
+    
