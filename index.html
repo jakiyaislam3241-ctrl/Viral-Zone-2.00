@@ -64,11 +64,12 @@
     .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
     .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
 
-    .alert-card { background: #ffffff; color: #000000; border-radius: 12px; padding: 20px; text-align: center; max-width: 300px; margin: auto; }
-    .alert-msg { font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 15px; line-height: 1.4; }
-    .btn-alert-close { background: #2b6cb0; color: #fff; border: none; padding: 8px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    /* Screenshot Exact Alert Notice Modal Style */
+    .alert-card { background: #ffffff; color: #000000; border-radius: 12px; padding: 25px 20px; text-align: center; max-width: 320px; margin: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+    .alert-msg { font-size: 13px; font-weight: 600; color: #1a202c; margin-bottom: 20px; line-height: 1.5; text-align: left; }
+    .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; }
 
-    /* In-App Video Player & Message */
+    /* In-App Video Player Modal */
     .video-container { width: 100%; border-radius: 8px; overflow: hidden; background: #000; }
     .video-container video { width: 100%; display: block; max-height: 250px; }
     .video-msg { background: #1a2230; border-left: 3px solid #ffcc00; padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 12px; color: #e2e8f0; line-height: 1.5; }
@@ -102,7 +103,7 @@
   <div class="overlay" id="detailsModal">
     <div class="modal-box">
       <span class="close-icon" onclick="hideModal('detailsModal')"><i class="fa-solid fa-xmark"></i></span>
-      <img src="" id="detImg" class="details-img" onerror="this.src='https://via.placeholder.com/400x200?text=No+Thumbnail'">
+      <img src="" id="detImg" class="details-img" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'">
       <div class="details-title" id="detTitle"></div>
       
       <div class="stats-row">
@@ -127,8 +128,8 @@
       <div class="instruction-card">
         <b><i class="fa-solid fa-circle-info"></i> How to Download?</b><br>
         1. Select any quality or part below.<br>
-        2. Wait for <b>10 seconds</b> on the opened link.<br>
-        3. Return to the app to watch the video!
+        2. Wait for <b id="insDuration">10 seconds</b> on the opened link.<br>
+        3. Return to the app to automatically watch the video!
       </div>
 
       <div id="partsList"></div>
@@ -144,24 +145,25 @@
       <div class="unlock-sub">ভিডিও আনলক করুন</div>
 
       <div class="instruction-card">
-        <b style="color: #ffcc00;"><i class="fa-regular fa-clock"></i> 10 সেকেন্ডের একটি বিজ্ঞাপন দেখতে হবে।</b><br>
+        <b style="color: #ffcc00;"><i class="fa-regular fa-clock"></i> <span id="adNoticeTime">10</span> সেকেন্ডের একটি বিজ্ঞাপন দেখতে হবে।</b><br>
         যদি না দেখেন, আপনার কাঙ্ক্ষিত ভিডিও পাবেন না।<br>
-        • নিচের বাটনে ক্লিক করুন এবং <b>কমপক্ষে 10 সেকেন্ড</b> সেই পেজে থাকুন, তারপর ফিরে আসুন।
+        • নিচের বাটনে ক্লিক করুন এবং <b>কমপক্ষে <span id="adNoticeTime2">10</span> সেকেন্ড</b> সেই পেজে থাকুন, তারপর ফিরে আসুন।
       </div>
 
       <div class="alert-notice">
-        <i class="fa-solid fa-triangle-exclamation"></i> 10 সেকেন্ডের আগে ফিরে আসলে ভিডিও পাঠানো হবে না।
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="adNoticeTime3">10</span> সেকেন্ডের আগে ফিরে আসলে ভিডিও পাঠানো হবে না।
       </div>
 
       <button class="btn-watch-ad" onclick="triggerAdView()"><i class="fa-solid fa-clapperboard"></i> বিজ্ঞাপন দেখুন & ভিডিও আনলক করুন</button>
     </div>
   </div>
 
-  <!-- Warning Alert Popup -->
-  <div class="overlay" id="noticeModal">
+  <!-- Screenshot Exact Alert Notice Modal -->
+  <div class="overlay" id="noticeModal" style="z-index: 2000;">
     <div class="alert-card">
-      <div class="alert-msg" id="noticeMsg">⚠️ You must wait full 10 seconds on the link.</div>
+      <div class="alert-msg" id="noticeMsg">⚠️ You must wait full 10 seconds on the link. 6s remaining.</div>
       <button class="btn-alert-close" onclick="hideModal('noticeModal')">Close</button>
+      <div style="clear: both;"></div>
     </div>
   </div>
 
@@ -225,7 +227,8 @@
       feed.innerHTML = '';
       videos.forEach((vid, idx) => {
         const partsCount = vid.parts ? vid.parts.length : 1;
-        const thumbUrl = vid.thumbnail || vid.thumb || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
+        // Fix Thumbnail Image Property Key
+        const thumbUrl = vid.thumbnail || vid.thumb || vid.img || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
         const views = vid.views || 0;
 
         feed.innerHTML += `
@@ -233,7 +236,7 @@
             <div class="thumb-wrapper">
               <span class="badge-top">🔥 TOP</span>
               <span class="badge-parts"><i class="fa-solid fa-list-ul"></i> ${partsCount} ${partsCount > 1 ? 'Parts' : 'Part'}</span>
-              <img src="${thumbUrl}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Thumbnail'">
+              <img src="${thumbUrl}" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Error'">
               <span class="views-count"><i class="fa-regular fa-eye"></i> ${views} Views</span>
             </div>
             <div class="card-info">
@@ -258,7 +261,8 @@
       const currentViews = (activeVideo.views || 0) + 1;
       update(ref(db, 'videos/' + vidId), { views: currentViews });
 
-      document.getElementById('detImg').src = activeVideo.thumbnail || activeVideo.thumb || 'https://via.placeholder.com/400x200?text=No+Thumbnail';
+      const thumbUrl = activeVideo.thumbnail || activeVideo.thumb || activeVideo.img || 'https://via.placeholder.com/400x200?text=Image+Not+Found';
+      document.getElementById('detImg').src = thumbUrl;
       document.getElementById('detTitle').innerText = activeVideo.title;
       document.getElementById('detLikes').innerText = activeVideo.likes || 0;
       document.getElementById('detDownloads').innerText = activeVideo.downloads || 0;
@@ -287,6 +291,9 @@
       const partsContainer = document.getElementById('partsList');
       partsContainer.innerHTML = '';
 
+      const reqTime = parseInt(activeVideo.adDuration) || 10;
+      document.getElementById('insDuration').innerText = reqTime + " seconds";
+
       const parts = activeVideo.parts || [];
       parts.forEach((partUrl, pIdx) => {
         partsContainer.innerHTML += `
@@ -302,6 +309,12 @@
     window.choosePart = function(url) {
       selectedPartUrl = url;
       hideModal('partsModal');
+      
+      const reqTime = parseInt(activeVideo.adDuration) || 10;
+      document.getElementById('adNoticeTime').innerText = reqTime;
+      document.getElementById('adNoticeTime2').innerText = reqTime;
+      document.getElementById('adNoticeTime3').innerText = reqTime;
+
       document.getElementById('unlockModal').style.display = 'flex';
     };
 
@@ -311,6 +324,7 @@
       window.open(adUrl, '_blank');
     };
 
+    // Strict Timer & Return Verification
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -319,6 +333,7 @@
 
         if (timeSpent < requiredTime) {
           let remaining = requiredTime - timeSpent;
+          // Screenshot exact message format
           document.getElementById('noticeMsg').innerText = `⚠️ You must wait full ${requiredTime} seconds on the link. ${remaining}s remaining.`;
           document.getElementById('noticeModal').style.display = 'flex';
         } else {
@@ -328,7 +343,7 @@
             document.getElementById('noticeMsg').innerText = `✅ Ads ${adsCountWatched} viewed! Please watch ${left} more ads to unlock.`;
             document.getElementById('noticeModal').style.display = 'flex';
           } else {
-            // Unlock & Play Video In-App
+            // Success: Play Video inside App
             hideModal('unlockModal');
             document.getElementById('player').src = selectedPartUrl;
             document.getElementById('videoModal').style.display = 'flex';
@@ -346,5 +361,4 @@
     };
   </script>
 </body>
-                                                                                          </html>
-                                                                                          
+</html>
