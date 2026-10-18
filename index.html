@@ -3,119 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BD VIRAL - User Panel</title>
+    <title>BD VIRAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #07040d;
-            --card-bg: rgba(23, 14, 38, 0.7);
-            --border-purple: rgba(168, 85, 247, 0.25);
+            --card-bg: rgba(23, 14, 38, 0.85);
+            --border-purple: rgba(168, 85, 247, 0.3);
             --primary-purple: #a855f7;
             --purple-glow: #9333ea;
-            --accent-pink: #ec4899;
             --text-main: #f3e8ff;
             --text-dim: #a78bfa;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', -apple-system, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: radial-gradient(circle at top, #1c0836 0%, var(--bg-color) 80%);
-            color: var(--text-main); min-height: 100vh; padding-bottom: 75px;
+            color: var(--text-main); min-height: 100vh; padding: 15px;
         }
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; background: rgba(11, 7, 18, 0.85);
-            backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid var(--border-purple);
+
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .header h1 { font-size: 20px; color: #fff; font-weight: bold; }
+        .header .badge { background: #d946ef; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        .search-box { position: relative; margin-bottom: 20px; }
+        .search-box input {
+            width: 100%; padding: 10px 10px 10px 35px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-purple); border-radius: 8px; color: #fff; outline: none; font-size: 13px;
         }
-        .logo {
-            font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, #fff, var(--primary-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .logo span {
-            background: linear-gradient(45deg, var(--primary-purple), var(--accent-pink));
-            -webkit-text-fill-color: white; font-size: 10px; padding: 3px 8px;
-            border-radius: 6px; font-weight: bold;
-        }
-        .search-box { padding: 0 16px; margin: 15px 0; }
-        .search-container { position: relative; }
-        .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
-        .search-input {
-            width: 100%; padding: 12px 16px 12px 42px;
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-purple);
-            border-radius: 12px; color: white; font-size: 14px; outline: none;
-        }
-        .section-title {
-            font-size: 16px; font-weight: 700; padding: 0 16px; margin: 15px 0 10px;
-            display: flex; align-items: center; gap: 8px; color: var(--primary-purple);
-        }
-        .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 16px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 13px; }
+
+        .section-title { font-size: 14px; font-weight: bold; color: var(--primary-purple); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+        .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
         .video-card {
             background: var(--card-bg); border: 1px solid var(--border-purple);
-            border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            cursor: pointer; transition: transform 0.2s;
+            border-radius: 10px; overflow: hidden; cursor: pointer;
         }
-        .video-card:active { transform: scale(0.97); }
-        .thumb-wrap { position: relative; width: 100%; height: 120px; background: #150a21; }
-        .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .badge-top { position: absolute; top: 6px; left: 6px; background: rgba(236, 72, 153, 0.85); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
-        .badge-views { position: absolute; bottom: 6px; left: 6px; background: rgba(0, 0, 0, 0.7); font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #ddd; }
-        .card-info { padding: 10px; }
-        .card-title {
-            font-size: 12px; font-weight: 600; line-height: 1.4;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; color: var(--text-main);
-        }
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px); display: none; justify-content: center;
-            align-items: center; z-index: 1000; padding: 20px;
-        }
-        .modal-content {
-            background: var(--card-bg); border: 1px solid var(--border-purple);
-            border-radius: 20px; width: 100%; max-width: 360px; padding: 24px;
-            text-align: center; position: relative; box-shadow: 0 0 30px rgba(147, 51, 234, 0.3);
-        }
-        .close-btn {
-            position: absolute; top: 14px; right: 14px; background: rgba(255, 255, 255, 0.1);
-            border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
-        }
-        .btn-ad {
-            width: 100%; padding: 14px; margin-top: 15px;
-            background: linear-gradient(135deg, var(--primary-purple), var(--purple-glow));
-            border: none; border-radius: 12px; color: white; font-weight: bold;
-            font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
-        }
-        .btn-ad:disabled { opacity: 0.6; cursor: not-allowed; }
-        video { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border-purple); }
+
+        .video-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
+        .video-card .info { padding: 8px; }
+        .video-card .title { font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Player Modal */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:99; justify-content:center; align-items:center; }
+        .modal-content { background: var(--card-bg); border:1px solid var(--border-purple); padding:20px; border-radius:15px; text-align:center; width:90%; max-width:400px; position:relative; }
+        .close-btn { position: absolute; right: 15px; top: 12px; background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+        .btn-ad { background: linear-gradient(135deg, var(--primary-purple), var(--purple-glow)); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:15px; width:100%; }
+        video { width:100%; border-radius:10px; margin-top:10px; }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">BD VIRAL <span>LINK</span></div>
-    </header>
 
-    <div class="search-box">
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" class="search-input" id="search-input" placeholder="Search Movies, Series, Videos...">
-        </div>
+    <div class="header">
+        <h1>BD VIRAL <span class="badge">LINK</span></h1>
     </div>
 
-    <div class="section-title"><i class="fa-solid fa-bolt"></i> Trending Now</div>
+    <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Search Movies, Series, Videos..." oninput="filterVideos()">
+    </div>
+
+    <div class="section-title">
+        <i class="fa-solid fa-bolt"></i> Trending Now
+    </div>
+
     <div class="video-grid" id="video-list"></div>
 
-    <div class="modal-overlay" id="unlock-modal">
+    <!-- Unlock Modal -->
+    <div class="modal" id="unlock-modal">
         <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-            <h3 id="modal-title" style="margin-bottom: 10px;">Unlock Video</h3>
-            <p id="modal-desc" style="font-size: 12px; color: var(--text-dim);">ভিডিওটি দেখতে নিচে বাটনে ক্লিক করে এডভারটাইজমেন্ট দেখুন।</p>
-            <button class="btn-ad" id="ad-action-btn" onclick="triggerAdProcess()">
-                <i class="fa-solid fa-lock-open"></i> <span id="ad-btn-text">Watch Ad to Unlock</span>
-            </button>
-            <div id="player-wrap" style="display: none;">
+            <button class="close-btn" onclick="closeModal()">✕</button>
+            <h3 id="modal-title" style="font-size: 14px; margin-top: 10px;">ভিডিও আনলক করুন</h3>
+            <button class="btn-ad" id="ad-btn" onclick="openAdLink()">🔓 Watch Ad to Unlock</button>
+            <div id="player-wrap" style="display:none;">
                 <video id="main-player" controls controlsList="nodownload">
                     <source id="video-src" src="" type="video/mp4">
                 </video>
@@ -127,141 +92,88 @@
         const tg = window.Telegram && window.Telegram.WebApp;
         if (tg) tg.expand();
 
-        // JSONBin configuration. Keep private API keys on a backend, not in public HTML.
         const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKNya69br18hV85EWc."; // Add data through a backend; do not expose a master key here.
+        const JSONBIN_API_KEY = "$2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKb9S9T7CsnQZ0v4xxe"; // আপনার Master Key এখানে দিয়ে দেওয়া হয়েছে
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
         let sampleVideos = [];
         let activeVideo = null;
-        let unlockInterval = null;
+
         async function fetchCloudData() {
-    try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: {
-                'X-Master-Key': $2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKNya69br18hV85EWc.
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                });
+                const data = await res.json();
+                
+                if (data && data.record) {
+                    adLink = data.record.adLink || adLink;
+                    timerSeconds = data.record.adTimer || timerSeconds;
+                    sampleVideos = data.record.videos || [];
+                    renderVideos(sampleVideos);
+                }
+            } catch (e) {
+                console.error("JSONBin Fetch Error:", e);
             }
-        });
-        const data = await res.json();
-        
-        if (data && data.record) {
-            adLink = data.record.adLink || adLink;
-            timerSeconds = data.record.adTimer || timerSeconds;
-            sampleVideos = data.record.videos || [];
-            renderVideos();
-        }
-    } catch (e) {
-        console.error("JSONBin Fetch Error:", e);
-    }
-        }
-        
         }
 
-        function renderVideos(filter = "") {
+        function renderVideos(list) {
             const container = document.getElementById('video-list');
-            const filtered = sampleVideos.filter(v =>
-                String(v.title || "").toLowerCase().includes(filter.toLowerCase())
-            );
-            if (filtered.length === 0) {
-                container.innerHTML = "<p style='grid-column:span 2;text-align:center;font-size:12px;color:#aaa;'>কোনো ভিডিও পাওয়া যায়নি।</p>";
+            if (!list || list.length === 0) {
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>কোনো ভিডিও পাওয়া যায়নি!</p>";
                 return;
             }
-            container.innerHTML = filtered.map(v => `
-                <div class="video-card" role="button" tabindex="0" data-video-id="${Number(v.id)}">
-                    <div class="thumb-wrap">
-                        <span class="badge-top">TOP</span>
-                        <img src="${escapeHTML(v.thumb || '')}" alt="ভিডিও থাম্বনেইল" loading="lazy">
-                        <span class="badge-views">👁 ${escapeHTML(v.views || '1.2K')}</span>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-title">${escapeHTML(v.title || 'শিরোনাম নেই')}</div>
+            container.innerHTML = list.map(v => `
+                <div class="video-card" onclick="openModal('${v.url}', '${v.title}')">
+                    <img src="${v.thumb}" alt="thumb">
+                    <div class="info">
+                        <div class="title">${v.title}</div>
                     </div>
                 </div>
             `).join('');
-            container.querySelectorAll('.video-card').forEach(card => {
-                const open = () => openModal(Number(card.dataset.videoId));
-                card.addEventListener('click', open);
-                card.addEventListener('keydown', event => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        open();
-                    }
-                });
-            });
         }
 
-        function escapeHTML(value) {
-            return String(value).replace(/[&<>"']/g, char => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[char]));
+        function filterVideos() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = sampleVideos.filter(v => v.title.toLowerCase().includes(query));
+            renderVideos(filtered);
         }
 
-        function openModal(id) {
-            activeVideo = sampleVideos.find(v => Number(v.id) === Number(id));
-            if (!activeVideo) return;
-            if (unlockInterval) clearInterval(unlockInterval);
-            const player = document.getElementById('main-player');
-            player.pause();
-            player.removeAttribute('src');
-            document.getElementById('video-src').src = '';
-            player.load();
-            document.getElementById('modal-title').textContent = activeVideo.title || 'ভিডিও';
+        function openModal(url, title) {
+            activeVideo = url;
+            document.getElementById('modal-title').innerText = title;
             document.getElementById('unlock-modal').style.display = 'flex';
             document.getElementById('player-wrap').style.display = 'none';
-            document.getElementById('ad-action-btn').style.display = 'block';
-            document.getElementById('ad-btn-text').textContent = 'Watch Ad to Unlock';
-            document.getElementById('ad-action-btn').disabled = false;
+            document.getElementById('ad-btn').style.display = 'block';
+            document.getElementById('ad-btn').innerText = "🔓 Watch Ad to Unlock";
+            document.getElementById('ad-btn').disabled = false;
         }
 
         function closeModal() {
             document.getElementById('unlock-modal').style.display = 'none';
-            document.getElementById('main-player').pause();
-            if (unlockInterval) {
-                clearInterval(unlockInterval);
-                unlockInterval = null;
-            }
+            const player = document.getElementById('main-player');
+            player.pause();
+            player.src = "";
         }
 
-        function triggerAdProcess() {
-            if (!activeVideo) return;
-            // This timer is only a demo, not proof that an advertisement was watched.
-            if (tg && typeof tg.openLink === 'function') {
-                tg.openLink(adLink);
-            } else {
-                window.open(adLink, '_blank', 'noopener,noreferrer');
-            }
-
-            const btn = document.getElementById('ad-action-btn');
-            const btnText = document.getElementById('ad-btn-text');
+        function openAdLink() {
+            window.open(adLink, '_blank');
+            let btn = document.getElementById('ad-btn');
+            let count = timerSeconds;
             btn.disabled = true;
-            let timeLeft = timerSeconds;
-            btnText.textContent = `অপেক্ষা করুন (${timeLeft}s)...`;
-
-            if (unlockInterval) clearInterval(unlockInterval);
-            unlockInterval = setInterval(() => {
-                timeLeft--;
-                btnText.textContent = `অপেক্ষা করুন (${Math.max(0, timeLeft)}s)...`;
-                if (timeLeft <= 0) {
-                    clearInterval(unlockInterval);
-                    unlockInterval = null;
+            
+            let timer = setInterval(() => {
+                btn.innerText = `অপেক্ষা করুন (${count}s)...`;
+                count--;
+                if (count < 0) {
+                    clearInterval(timer);
                     btn.style.display = 'none';
                     document.getElementById('player-wrap').style.display = 'block';
-                    document.getElementById('video-src').src = activeVideo.url || '';
-                    const player = document.getElementById('main-player');
-                    player.load();
-                    player.play().catch(() => {});
+                    document.getElementById('main-player').src = activeVideo;
                 }
             }, 1000);
         }
-
-        document.getElementById('search-input').addEventListener('input', event => {
-            renderVideos(event.target.value.trim());
-        });
-
-        document.getElementById('unlock-modal').addEventListener('click', event => {
-            if (event.target.id === 'unlock-modal') closeModal();
-        });
 
         fetchCloudData();
     </script>
