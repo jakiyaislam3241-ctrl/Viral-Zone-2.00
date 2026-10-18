@@ -136,6 +136,26 @@
         let sampleVideos = [];
         let activeVideo = null;
         let unlockInterval = null;
+        async function fetchCloudData() {
+    try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': $2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKNya69br18hV85EWc.
+            }
+        });
+        const data = await res.json();
+        
+        if (data && data.record) {
+            adLink = data.record.adLink || adLink;
+            timerSeconds = data.record.adTimer || timerSeconds;
+            sampleVideos = data.record.videos || [];
+            renderVideos();
+        }
+    } catch (e) {
+        console.error("JSONBin Fetch Error:", e);
+    }
+        }
+        
         }
 
         function renderVideos(filter = "") {
