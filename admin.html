@@ -35,13 +35,13 @@
       </div>
 
       <div class="form-group">
-        <label><i class="fa-solid fa-image"></i> Thumbnail Image Direct Link</label>
-        <input type="url" id="vThumb" placeholder="https://i.ibb.co/photo.jpg" required>
+        <label><i class="fa-solid fa-image"></i> Thumbnail Image Link</label>
+        <input type="url" id="vThumb" placeholder="https://image-link.com/photo.jpg" required>
       </div>
 
       <div class="form-group">
         <label><i class="fa-solid fa-video"></i> Video Link(s) (For multiple parts use comma ,)</label>
-        <textarea id="vLinks" rows="3" placeholder="https://site.com/part1.mp4, https://site.com/part2.mp4" required></textarea>
+        <textarea id="vLinks" rows="3" placeholder="https://video1.mp4, https://video2.mp4" required></textarea>
       </div>
 
       <div class="row-2">
@@ -65,10 +65,12 @@
     </form>
   </div>
 
+  <!-- Firebase Admin Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // Your Web App's Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
       authDomain: "viral-zone-f39b4.firebaseapp.com",
@@ -93,6 +95,7 @@
       const adDuration = document.getElementById('vAdDuration').value;
       const adLink = document.getElementById('vAdLink').value;
 
+      // Parse video parts array
       const partsArr = rawLinks.split(',').map(url => url.trim());
 
       const payload = {
@@ -102,14 +105,16 @@
         adLimit: parseInt(adLimit),
         adDuration: parseInt(adDuration),
         adLink: adLink,
-        views: 0,
         likes: 0,
+        downloads: 0,
+        views: 0,
         createdAt: Date.now()
       };
 
+      // Push to Firebase Realtime Database
       push(ref(db, 'videos'), payload)
         .then(() => {
-          alert('✅ Video uploaded successfully!');
+          alert('✅ Video successfully uploaded to User Panel!');
           document.getElementById('adminForm').reset();
         })
         .catch((err) => {
