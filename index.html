@@ -136,21 +136,6 @@
         let sampleVideos = [];
         let activeVideo = null;
         let unlockInterval = null;
-
-        async function fetchCloudData() {
-            // Demo fallback: used when no public, read-only data endpoint is configured.
-            sampleVideos = JSON.parse(localStorage.getItem('app_videos') || 'null') || [
-                {
-                    id: 1,
-                    title: "ডেমো ভিডিও",
-                    views: "1.2K",
-                    thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500",
-                    url: "https://www.w3schools.com/html/mov_bbb.mp4"
-                }
-            ];
-            adLink = localStorage.getItem('app_ad_link') || adLink;
-            timerSeconds = Math.max(1, parseInt(localStorage.getItem('app_ad_timer'), 10) || 10);
-            renderVideos();
         }
 
         function renderVideos(filter = "") {
