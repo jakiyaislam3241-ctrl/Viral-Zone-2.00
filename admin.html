@@ -9,52 +9,91 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0d0d0d; color: #ffffff; padding: 20px; }
     header { background-color: #121212; padding: 15px; text-align: center; border-bottom: 2px solid #ffcc00; margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #ffcc00; }
-    .admin-card { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ffcc00; max-width: 500px; margin: 0 auto; }
+    
+    .container { max-width: 600px; margin: 0 auto; }
+    
+    .admin-card { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ffcc00; margin-bottom: 30px; }
+    
     .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; color: #ffcc00; margin-bottom: 5px; }
+    .form-group label { display: block; font-size: 13px; color: #ffcc00; margin-bottom: 5px; font-weight: 600; }
     .form-group input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; outline: none; }
     .form-group input:focus { border-color: #ffcc00; }
+    
     .btn-submit { background: #ffcc00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn-submit:hover { background: #e6b800; }
+
+    /* Uploaded List & Edit Section */
+    .section-title { font-size: 18px; color: #ffcc00; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+    
+    .video-item { background: #181818; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .video-header { display: flex; align-items: center; gap: 10px; }
+    .video-header img { width: 60px; height: 50px; object-fit: cover; border-radius: 5px; background: #222; }
+    .video-info { flex: 1; }
+    .video-info h4 { font-size: 14px; color: #fff; margin-bottom: 4px; }
+    .video-info p { font-size: 11px; color: #aaa; }
+
+    .edit-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+    .edit-inputs input { background: #000; border: 1px solid #444; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+
+    .action-btns { display: flex; gap: 10px; margin-top: 5px; }
+    .btn-update { background: #00c853; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; flex: 1; }
+    .btn-delete { background: #ff3d00; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
   </style>
 </head>
 <body>
 
-  <header><i class="fa-solid fa-user-gear"></i> Admin Panel (Video Upload)</header>
+  <header><i class="fa-solid fa-user-gear"></i> Admin Panel</header>
 
-  <div class="admin-card">
-    <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload Video Content</h3>
-    <form id="adminForm" onsubmit="uploadToFirebase(event)">
-      <div class="form-group">
-        <label>Thumbnail Image Link (URL)</label>
-        <input type="url" id="adminImg" placeholder="https://example.com/image.jpg" required>
-      </div>
-      <div class="form-group">
-        <label>Video Title</label>
-        <input type="text" id="adminTitle" placeholder="Enter title" required>
-      </div>
-      <div class="form-group">
-        <label>Select Video File (Upload Box)</label>
-        <input type="file" id="adminVideoFile" accept="video/*" required style="padding: 7px; background: #111; cursor: pointer;">
-      </div>
-      <div class="form-group">
-        <label>Ads Limit</label>
-        <input type="number" id="adminAdLimit" min="1" value="1" required>
-      </div>
-      <div class="form-group">
-        <label>Ads Duration (Seconds)</label>
-        <input type="number" id="adminAdDuration" min="1" value="10" required>
-      </div>
-      <div class="form-group">
-        <label>Adsterra Direct Link</label>
-        <input type="url" id="adminAdLink" placeholder="https://www.adsterra.com/direct-link" required>
-      </div>
-      <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> Upload to Firebase</button>
-    </form>
+  <div class="container">
+    <!-- UPLOAD FORM -->
+    <div class="admin-card">
+      <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload New Video</h3>
+      <form id="adminForm" onsubmit="uploadToFirebase(event)">
+        
+        <div class="form-group">
+          <label>1. VIDEO TITLE</label>
+          <input type="text" id="adminTitle" placeholder="Enter video title" required>
+        </div>
+
+        <div class="form-group">
+          <label>2. THUMBNAIL UPLOAD (Image URL / Link)</label>
+          <input type="url" id="adminImg" placeholder="https://example.com/image.jpg" required>
+        </div>
+
+        <div class="form-group">
+          <label>3. VIDEO UPLOAD (File Select Box)</label>
+          <input type="file" id="adminVideoFile" accept="video/*" required style="padding: 7px; background: #111; cursor: pointer;">
+        </div>
+
+        <div class="form-group">
+          <label>4. ADS LIMIT</label>
+          <input type="number" id="adminAdLimit" min="1" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label>5. ADS DURATION (Seconds)</label>
+          <input type="number" id="adminAdDuration" min="1" value="10" required>
+        </div>
+
+        <div class="form-group">
+          <label>6. ADS LINK (Adsterra Direct Link)</label>
+          <input type="url" id="adminAdLink" placeholder="https://www.adsterra.com/direct-link" required>
+        </div>
+
+        <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Video</button>
+      </form>
+    </div>
+
+    <!-- MANAGE / EDIT UPLOADED VIDEOS SECTION -->
+    <div class="section-title"><i class="fa-solid fa-list-check"></i> Manage Uploaded Videos</div>
+    <div id="uploadedList">
+      <div style="text-align:center; color:#888; padding:20px;">Loading videos from Firebase...</div>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
@@ -69,6 +108,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Upload New Video
     window.uploadToFirebase = async function(event) {
       event.preventDefault();
       const submitBtn = event.target.querySelector('button');
@@ -83,12 +123,11 @@
       submitBtn.disabled = true;
 
       try {
-        // Mocking video file name/URL since Firestore stores text references (can be extended with Firebase Storage if needed)
         const videoFileName = fileInput.files[0].name;
 
         await addDoc(collection(db, "videos"), {
-          img: document.getElementById('adminImg').value,
           title: document.getElementById('adminTitle').value,
+          img: document.getElementById('adminImg').value,
           videoFileName: videoFileName,
           adLimit: parseInt(document.getElementById('adminAdLimit').value),
           adDuration: parseInt(document.getElementById('adminAdDuration').value),
@@ -96,16 +135,113 @@
           createdAt: Date.now()
         });
 
-        alert("Video successfully uploaded to Firebase!");
+        alert("Video uploaded successfully!");
         document.getElementById('adminForm').reset();
+        loadUploadedVideos();
       } catch (error) {
-        console.error("Error adding document: ", error);
-        alert("Upload failed! Check console.");
+        console.error("Error uploading: ", error);
+        alert("Upload failed!");
       } finally {
-        submitBtn.innerText = "Upload to Firebase";
+        submitBtn.innerText = "Upload Video";
         submitBtn.disabled = false;
       }
     }
+
+    // Fetch & Display Uploaded Videos for Edit/Delete
+    async function loadUploadedVideos() {
+      const container = document.getElementById('uploadedList');
+      container.innerHTML = '<div style="text-align:center; color:#888;">Loading...</div>';
+
+      try {
+        const querySnapshot = await getDocs(collection(db, "videos"));
+        container.innerHTML = '';
+
+        if(querySnapshot.empty) {
+          container.innerHTML = '<div style="text-align:center; color:#888;">No uploaded videos found.</div>';
+          return;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const docId = docSnap.id;
+
+          container.innerHTML += `
+            <div class="video-item" id="item-${docId}">
+              <div class="video-header">
+                <img src="${data.img}" onerror="this.src='https://via.placeholder.com/60x50/222/ffcc00?text=Thumb'" alt="thumb">
+                <div class="video-info">
+                  <h4>File: ${data.videoFileName || 'N/A'}</h4>
+                  <p>Ad Link: ${data.adLink}</p>
+                </div>
+              </div>
+
+              <!-- EDIT INPUTS -->
+              <div class="edit-inputs">
+                <div>
+                  <label style="font-size:10px; color:#ffcc00;">EDIT TITLE</label>
+                  <input type="text" id="title-${docId}" value="${data.title || ''}">
+                </div>
+                <div>
+                  <label style="font-size:10px; color:#ffcc00;">EDIT ADS LIMIT</label>
+                  <input type="number" id="limit-${docId}" value="${data.adLimit || 1}">
+                </div>
+                <div style="grid-column: span 2;">
+                  <label style="font-size:10px; color:#ffcc00;">EDIT ADS DURATION (Sec)</label>
+                  <input type="number" id="duration-${docId}" value="${data.adDuration || 10}">
+                </div>
+              </div>
+
+              <!-- ACTION BUTTONS -->
+              <div class="action-btns">
+                <button class="btn-update" onclick="updateVideo('${docId}')"><i class="fa-solid fa-floppy-disk"></i> Save Edit</button>
+                <button class="btn-delete" onclick="deleteVideo('${docId}')"><i class="fa-solid fa-trash"></i> Delete</button>
+              </div>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error("Load error:", error);
+        container.innerHTML = '<div style="text-align:center; color:#ff5555;">Error loading list.</div>';
+      }
+    }
+
+    // Save Edit Function
+    window.updateVideo = async function(docId) {
+      const newTitle = document.getElementById(`title-${docId}`).value;
+      const newLimit = parseInt(document.getElementById(`limit-${docId}`).value);
+      const newDuration = parseInt(document.getElementById(`duration-${docId}`).value);
+
+      try {
+        const videoRef = doc(db, "videos", docId);
+        await updateDoc(videoRef, {
+          title: newTitle,
+          adLimit: newLimit,
+          adDuration: newDuration
+        });
+        alert("Video updated successfully!");
+        loadUploadedVideos();
+      } catch (error) {
+        console.error("Update error:", error);
+        alert("Failed to update video!");
+      }
+    }
+
+    // Delete Video Function
+    window.deleteVideo = async function(docId) {
+      if(!confirm("Are you sure you want to delete this video?")) return;
+
+      try {
+        await deleteDoc(doc(db, "videos", docId));
+        alert("Video deleted successfully!");
+        loadUploadedVideos();
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert("Failed to delete video!");
+      }
+    }
+
+    // Initial Load
+    loadUploadedVideos();
   </script>
 </body>
 </html>
