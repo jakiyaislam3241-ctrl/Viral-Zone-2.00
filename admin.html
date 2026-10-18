@@ -19,10 +19,10 @@
 </head>
 <body>
 
-  <header><i class="fa-solid fa-user-gear"></i> Admin Panel (Firebase Connected)</header>
+  <header><i class="fa-solid fa-user-gear"></i> Admin Panel (Video Upload)</header>
 
   <div class="admin-card">
-    <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload New Video Content</h3>
+    <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload Video Content</h3>
     <form id="adminForm" onsubmit="uploadToFirebase(event)">
       <div class="form-group">
         <label>Thumbnail Image Link (URL)</label>
@@ -33,8 +33,8 @@
         <input type="text" id="adminTitle" placeholder="Enter title" required>
       </div>
       <div class="form-group">
-        <label>Number of Parts / Videos</label>
-        <input type="number" id="adminParts" min="1" max="20" value="1" required>
+        <label>Select Video File (Upload Box)</label>
+        <input type="file" id="adminVideoFile" accept="video/*" required style="padding: 7px; background: #111; cursor: pointer;">
       </div>
       <div class="form-group">
         <label>Ads Limit</label>
@@ -72,14 +72,24 @@
     window.uploadToFirebase = async function(event) {
       event.preventDefault();
       const submitBtn = event.target.querySelector('button');
+      const fileInput = document.getElementById('adminVideoFile');
+      
+      if(fileInput.files.length === 0) {
+        alert("Please select a video file!");
+        return;
+      }
+
       submitBtn.innerText = "Uploading...";
       submitBtn.disabled = true;
 
       try {
+        // Mocking video file name/URL since Firestore stores text references (can be extended with Firebase Storage if needed)
+        const videoFileName = fileInput.files[0].name;
+
         await addDoc(collection(db, "videos"), {
           img: document.getElementById('adminImg').value,
           title: document.getElementById('adminTitle').value,
-          parts: parseInt(document.getElementById('adminParts').value),
+          videoFileName: videoFileName,
           adLimit: parseInt(document.getElementById('adminAdLimit').value),
           adDuration: parseInt(document.getElementById('adminAdDuration').value),
           adLink: document.getElementById('adminAdLink').value,
