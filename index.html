@@ -93,7 +93,7 @@
         if (tg) tg.expand();
 
         const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKb9S9T7CsnQZ0v4xxe"; // আপনার Master Key এখানে দিয়ে দেওয়া হয়েছে
+        const JSONBIN_API_KEY = "$2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKb9S9T7CsnQZ0v4xxe";
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
@@ -101,27 +101,47 @@
         let activeVideo = null;
 
         async function fetchCloudData() {
+            const container = document.getElementById('video-list');
+            container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
+            
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                // Primary Request
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 
+                        'X-Master-Key': JSONBIN_API_KEY,
+                        'X-Bin-Meta': 'false'
+                    }
                 });
-                const data = await res.json();
+
+                let data;
+                if (res.ok) {
+                    data = await res.json();
+                } else {
+                    // CORS Proxy Backup Request
+                    const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`);
+                    let proxyRes = await fetch(proxyUrl, {
+                        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                    });
+                    data = await proxyRes.json();
+                }
                 
-                if (data && data.record) {
-                    adLink = data.record.adLink || adLink;
-                    timerSeconds = data.record.adTimer || timerSeconds;
-                    sampleVideos = data.record.videos || [];
+                if (data) {
+                    let record = data.record || data;
+                    adLink = record.adLink || adLink;
+                    timerSeconds = record.adTimer || timerSeconds;
+                    sampleVideos = record.videos || [];
                     renderVideos(sampleVideos);
                 }
             } catch (e) {
-                console.error("JSONBin Fetch Error:", e);
+                console.error("Fetch Error:", e);
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try করুন।</p>";
             }
         }
 
         function renderVideos(list) {
             const container = document.getElementById('video-list');
             if (!list || list.length === 0) {
-                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>কোনো ভিডিও পাওয়া যায়নি!</p>";
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Kono video pawa jayni!</p>";
                 return;
             }
             container.innerHTML = list.map(v => `
@@ -164,7 +184,7 @@
             btn.disabled = true;
             
             let timer = setInterval(() => {
-                btn.innerText = `অপেক্ষা করুন (${count}s)...`;
+                btn.innerText = `Wait (${count}s)...`;
                 count--;
                 if (count < 0) {
                     clearInterval(timer);
