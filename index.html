@@ -93,7 +93,6 @@
         if (tg) tg.expand();
 
         const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$8kiSHCANxWYonMv7vhymkueXNd2sTQrD.OnnLIqrKkhB0i1.FtXOK";
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
@@ -105,15 +104,10 @@
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
             
             try {
-                const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`);
-                const res = await fetch(proxyUrl, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_API_KEY
-                    }
-                });
-
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
+                // Using JSONBin public/raw endpoint proxy free
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest?meta=false`);
+                if (!res.ok) throw new Error("Network response was not ok");
+                
                 const data = await res.json();
                 
                 if (data) {
@@ -125,7 +119,18 @@
                 }
             } catch (e) {
                 console.error("Fetch Error:", e);
-                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
+                // Fallback using allorigins proxy if direct fails
+                try {
+                    const proxyRes = await fetch(`https://api.allorigins.win/raw?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F${JSONBIN_BIN_ID}%2Flatest`);
+                    const proxyData = await proxyRes.json();
+                    let record = proxyData.record || proxyData;
+                    adLink = record.adLink || adLink;
+                    timerSeconds = record.adTimer || timerSeconds;
+                    sampleVideos = record.videos || [];
+                    renderVideos(sampleVideos);
+                } catch (err) {
+                    container.innerHTML = "<p style='grid-column:1/-1; test-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
+                }
             }
         }
 
