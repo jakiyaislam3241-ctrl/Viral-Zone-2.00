@@ -6,6 +6,9 @@
   <title>BD Viral Link</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Firebase App & Realtime Database CDN (Compat version for instant loading) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -68,7 +71,7 @@
     .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
     .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
 
-    /* Screenshot Exact Alert Notice Modal Style (White Popup matching image) */
+    /* Screenshot Exact Alert Notice Dialog Modal */
     .alert-card { background: #ffffff; color: #000000; border-radius: 16px; padding: 25px 20px 15px; text-align: left; max-width: 320px; margin: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
     .alert-msg { font-size: 14px; font-weight: 500; color: #2d3748; margin-bottom: 25px; line-height: 1.5; }
     .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; padding: 5px; }
@@ -166,15 +169,13 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
+  <script>
     const tg = window.Telegram?.WebApp;
     if (tg) tg.ready();
 
     const BOT_TOKEN = "8908636574:AAE23EW6gLUpBO7tRDnjzTb6OYUdWQkfneQ";
 
+    // Firebase Config (Compat SDK)
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
       authDomain: "viral-zone-f39b4.firebaseapp.com",
@@ -186,8 +187,8 @@
       measurementId: "G-GSXHHDSPL0"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     let globalVideos = [];
     let activeVideo = null;
@@ -196,17 +197,10 @@
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
-    // Realtime Database Listener with Safety Timeout
-    const videoRef = ref(db, 'videos');
+    // Load Videos from Firebase Realtime Database
+    const videoRef = db.ref('videos');
     
-    setTimeout(() => {
-      const feed = document.getElementById('mainFeed');
-      if (globalVideos.length === 0 && feed.innerHTML.includes("Loading Videos...")) {
-        feed.innerHTML = '<div class="status-msg">No videos found or connection timeout! Please check Firebase Rules.</div>';
-      }
-    }, 5000);
-
-    onValue(videoRef, (snapshot) => {
+    videoRef.on('value', (snapshot) => {
       const data = snapshot.val();
       globalVideos = [];
       if (data) {
@@ -217,7 +211,7 @@
       renderAppFeed(globalVideos);
     }, (error) => {
       console.error(error);
-      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase rules!</div>';
+      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase Rules!</div>';
     });
 
     function renderAppFeed(videos) {
@@ -260,7 +254,7 @@
       adsCountWatched = 0; 
       
       const currentViews = (activeVideo.views || 0) + 1;
-      update(ref(db, 'videos/' + vidId), { views: currentViews });
+      db.ref('videos/' + vidId).update({ views: currentViews });
 
       const thumbUrl = activeVideo.thumbnail || activeVideo.thumb || activeVideo.img || activeVideo.image || 'https://via.placeholder.com/400x200?text=No+Thumbnail';
       document.getElementById('detImg').src = thumbUrl;
@@ -277,7 +271,7 @@
       const newLikes = (activeVideo.likes || 0) + 1;
       activeVideo.likes = newLikes;
       document.getElementById('detLikes').innerText = newLikes;
-      update(ref(db, 'videos/' + activeVideo.id), { likes: newLikes });
+      db.ref('videos/' + activeVideo.id).update({ likes: newLikes });
     };
 
     window.handleDownloadClick = function() {
@@ -286,7 +280,7 @@
       const newDownloads = (activeVideo.downloads || 0) + 1;
       activeVideo.downloads = newDownloads;
       document.getElementById('detDownloads').innerText = newDownloads;
-      update(ref(db, 'videos/' + activeVideo.id), { downloads: newDownloads });
+      db.ref('videos/' + activeVideo.id).update({ downloads: newDownloads });
 
       hideModal('detailsModal');
       const partsContainer = document.getElementById('partsList');
@@ -326,6 +320,7 @@
       window.open(adUrl, '_blank');
     };
 
+    // Strict Timer & Telegram Bot Integration Check
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -351,4 +346,11 @@
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-    
+              body: JSON.stringify({
+                chat_id: userId,
+                text: messageText,
+                parse_mode: 'Markdown'
+              })
+            })
+            .then(res => res.json())
+            .then(data =
