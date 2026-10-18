@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BD Viral Link</title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -37,11 +40,12 @@
 
     .status-msg { text-align: center; color: #a0aec0; padding: 40px 15px; font-size: 14px; grid-column: span 2; }
 
+    /* Modals Base */
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
     .modal-box { background: #121721; border: 1px solid #ffcc00; width: 100%; max-width: 420px; border-radius: 12px; padding: 15px; position: relative; max-height: 90vh; overflow-y: auto; }
     .close-icon { position: absolute; top: 12px; right: 15px; color: #a0aec0; font-size: 20px; cursor: pointer; background: #1a2230; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-    .details-img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; background: #1a2230; }
+    .details-img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; background: #1a2230; display: block; }
     .details-title { font-size: 15px; color: #fff; margin: 10px 0; line-height: 1.4; font-weight: bold; }
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
     .stat-btn { background: #1a2230; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; text-align: center; color: #a0aec0; font-size: 11px; }
@@ -64,15 +68,10 @@
     .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
     .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
 
-    /* Screenshot Exact Alert Notice Modal Style */
-    .alert-card { background: #ffffff; color: #000000; border-radius: 12px; padding: 25px 20px; text-align: center; max-width: 320px; margin: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
-    .alert-msg { font-size: 13px; font-weight: 600; color: #1a202c; margin-bottom: 20px; line-height: 1.5; text-align: left; }
-    .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; }
-
-    /* In-App Video Player Modal */
-    .video-container { width: 100%; border-radius: 8px; overflow: hidden; background: #000; }
-    .video-container video { width: 100%; display: block; max-height: 250px; }
-    .video-msg { background: #1a2230; border-left: 3px solid #ffcc00; padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 12px; color: #e2e8f0; line-height: 1.5; }
+    /* Screenshot Exact Alert Notice Modal Style (White Popup matching image) */
+    .alert-card { background: #ffffff; color: #000000; border-radius: 16px; padding: 25px 20px 15px; text-align: left; max-width: 320px; margin: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+    .alert-msg { font-size: 14px; font-weight: 500; color: #2d3748; margin-bottom: 25px; line-height: 1.5; }
+    .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; padding: 5px; }
   </style>
 </head>
 <body>
@@ -103,7 +102,7 @@
   <div class="overlay" id="detailsModal">
     <div class="modal-box">
       <span class="close-icon" onclick="hideModal('detailsModal')"><i class="fa-solid fa-xmark"></i></span>
-      <img src="" id="detImg" class="details-img" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'">
+      <img src="" id="detImg" class="details-img" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/400x200?text=No+Thumbnail'">
       <div class="details-title" id="detTitle"></div>
       
       <div class="stats-row">
@@ -129,7 +128,7 @@
         <b><i class="fa-solid fa-circle-info"></i> How to Download?</b><br>
         1. Select any quality or part below.<br>
         2. Wait for <b id="insDuration">10 seconds</b> on the opened link.<br>
-        3. Return to the app to automatically watch the video!
+        3. Return to the app to automatically receive the file in your Bot!
       </div>
 
       <div id="partsList"></div>
@@ -158,7 +157,7 @@
     </div>
   </div>
 
-  <!-- Screenshot Exact Alert Notice Modal -->
+  <!-- Screenshot Exact Alert Notice Dialog Modal -->
   <div class="overlay" id="noticeModal" style="z-index: 2000;">
     <div class="alert-card">
       <div class="alert-msg" id="noticeMsg">⚠️ You must wait full 10 seconds on the link. 6s remaining.</div>
@@ -167,24 +166,15 @@
     </div>
   </div>
 
-  <!-- Final In-App Video Player Modal -->
-  <div class="overlay" id="videoModal">
-    <div class="modal-box">
-      <span class="close-icon" onclick="hideModal('videoModal')"><i class="fa-solid fa-xmark"></i></span>
-      <div class="video-container">
-        <video id="player" controls autoplay style="width: 100%;">
-          <source src="" type="video/mp4">
-        </video>
-      </div>
-      <div class="video-msg">
-        Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.
-      </div>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Telegram Mini App Initialization
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.ready();
+
+    const BOT_TOKEN = "8908636574:AAE23EW6gLUpBO7tRDnjzTb6OYUdWQkfneQ";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
@@ -202,6 +192,7 @@
 
     let globalVideos = [];
     let activeVideo = null;
+    let selectedPartIndex = 0;
     let selectedPartUrl = "";
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
@@ -227,8 +218,8 @@
       feed.innerHTML = '';
       videos.forEach((vid, idx) => {
         const partsCount = vid.parts ? vid.parts.length : 1;
-        // Fix Thumbnail Image Property Key
-        const thumbUrl = vid.thumbnail || vid.thumb || vid.img || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
+        // Fix Thumbnail rendering with comprehensive fallback keys
+        const thumbUrl = vid.thumbnail || vid.thumb || vid.img || vid.image || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
         const views = vid.views || 0;
 
         feed.innerHTML += `
@@ -236,7 +227,7 @@
             <div class="thumb-wrapper">
               <span class="badge-top">🔥 TOP</span>
               <span class="badge-parts"><i class="fa-solid fa-list-ul"></i> ${partsCount} ${partsCount > 1 ? 'Parts' : 'Part'}</span>
-              <img src="${thumbUrl}" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Error'">
+              <img src="${thumbUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=No+Thumbnail';">
               <span class="views-count"><i class="fa-regular fa-eye"></i> ${views} Views</span>
             </div>
             <div class="card-info">
@@ -261,7 +252,7 @@
       const currentViews = (activeVideo.views || 0) + 1;
       update(ref(db, 'videos/' + vidId), { views: currentViews });
 
-      const thumbUrl = activeVideo.thumbnail || activeVideo.thumb || activeVideo.img || 'https://via.placeholder.com/400x200?text=Image+Not+Found';
+      const thumbUrl = activeVideo.thumbnail || activeVideo.thumb || activeVideo.img || activeVideo.image || 'https://via.placeholder.com/400x200?text=No+Thumbnail';
       document.getElementById('detImg').src = thumbUrl;
       document.getElementById('detTitle').innerText = activeVideo.title;
       document.getElementById('detLikes').innerText = activeVideo.likes || 0;
@@ -297,7 +288,7 @@
       const parts = activeVideo.parts || [];
       parts.forEach((partUrl, pIdx) => {
         partsContainer.innerHTML += `
-          <div class="part-item-btn" onclick="choosePart('${partUrl}')">
+          <div class="part-item-btn" onclick="choosePart('${partUrl}', ${pIdx})">
             <span><i class="fa-solid fa-download"></i> Video Part ${pIdx + 1} [HD]</span>
             <i class="fa-solid fa-lock" style="color:#a0aec0;"></i>
           </div>
@@ -306,8 +297,9 @@
       document.getElementById('partsModal').style.display = 'flex';
     };
 
-    window.choosePart = function(url) {
+    window.choosePart = function(url, pIdx) {
       selectedPartUrl = url;
+      selectedPartIndex = pIdx;
       hideModal('partsModal');
       
       const reqTime = parseInt(activeVideo.adDuration) || 10;
@@ -324,7 +316,7 @@
       window.open(adUrl, '_blank');
     };
 
-    // Strict Timer & Return Verification
+    // Strict Timer & Telegram Bot Integration Check
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -333,7 +325,7 @@
 
         if (timeSpent < requiredTime) {
           let remaining = requiredTime - timeSpent;
-          // Screenshot exact message format
+          // Exact Screenshot Alert Dialogue Notice Format
           document.getElementById('noticeMsg').innerText = `⚠️ You must wait full ${requiredTime} seconds on the link. ${remaining}s remaining.`;
           document.getElementById('noticeModal').style.display = 'flex';
         } else {
@@ -343,22 +335,20 @@
             document.getElementById('noticeMsg').innerText = `✅ Ads ${adsCountWatched} viewed! Please watch ${left} more ads to unlock.`;
             document.getElementById('noticeModal').style.display = 'flex';
           } else {
-            // Success: Play Video inside App
+            // Success: Send Video to New Telegram Bot via Telegram API
             hideModal('unlockModal');
-            document.getElementById('player').src = selectedPartUrl;
-            document.getElementById('videoModal').style.display = 'flex';
-          }
-        }
-        adWatchStartTime = 0; 
-      }
-    });
 
-    window.hideModal = function(id) {
-      document.getElementById(id).style.display = 'none';
-      if(id === 'videoModal') {
-        document.getElementById('player').pause();
-      }
-    };
-  </script>
-</body>
-</html>
+            const userId = tg?.initDataUnsafe?.user?.id || "6489017273"; // Fallback chat ID if test browser
+            const messageText = `🎬 *${activeVideo.title}* [Part ${selectedPartIndex + 1}]\n\n🔗 Video Link: ${selectedPartUrl}\n\n💬 Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
+
+            // Telegram Bot API Request to send message directly to user inbox
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: userId,
+                text: messageText,
+                parse_mode: 'Markdown'
+              })
+            })
+            .then(
