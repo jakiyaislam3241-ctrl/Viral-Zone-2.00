@@ -3,355 +3,490 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BD Viral Link</title>
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Firebase App & Realtime Database CDN (v8 Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>BD Viral Link - User App</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b0e14; color: #ffffff; padding-bottom: 20px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-    .top-bar { background: #121721; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937; }
-    .brand-title { color: #fff; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-    .brand-badge { background: #e50914; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-    .home-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; text-decoration: none; }
+    body {
+      background-color: #0d0d0d;
+      color: #ffffff;
+      padding-bottom: 70px;
+    }
 
-    .search-box { margin: 12px 15px; background: #1a2230; border-radius: 20px; padding: 10px 15px; display: flex; align-items: center; gap: 10px; color: #8a99ad; font-size: 14px; }
-    .search-box input { background: transparent; border: none; color: #fff; width: 100%; outline: none; }
-    .cat-btn { background: #e50914; color: #fff; text-align: center; padding: 10px; margin: 0 15px 12px; border-radius: 8px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    
-    .tags-container { display: flex; gap: 8px; padding: 0 15px 15px; overflow-x: auto; }
-    .tag-chip { background: #1a2230; color: #ffcc00; padding: 6px 12px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #2d3748; }
+    :root {
+      --primary-yellow: #ffcc00;
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --text-muted: #aaa;
+    }
 
-    .section-header { padding: 5px 15px 10px; font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
-    .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 15px; }
-    
-    .video-card { background: #121721; border-radius: 10px; overflow: hidden; position: relative; border: 1px solid #1f2937; cursor: pointer; }
-    .thumb-wrapper { position: relative; width: 100%; height: 110px; background: #1a2230; }
-    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .badge-top { position: absolute; top: 6px; left: 6px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 2; }
-    .badge-parts { position: absolute; top: 6px; right: 6px; background: #00b894; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: flex; align-items: center; gap: 4px; z-index: 2; }
-    .views-count { position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.7); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; z-index: 2; }
-    
-    .card-info { padding: 8px; display: flex; gap: 8px; align-items: flex-start; }
-    .card-avatar { width: 24px; height: 24px; background: #e50914; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; flex-shrink: 0; }
-    .card-title { font-size: 12px; color: #e2e8f0; line-height: 1.3; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    /* Header */
+    header {
+      background-color: var(--bg-dark);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--primary-yellow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-    .status-msg { text-align: center; color: #a0aec0; padding: 40px 15px; font-size: 14px; grid-column: span 2; }
+    .brand {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary-yellow);
+    }
 
-    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-    .modal-box { background: #121721; border: 1px solid #ffcc00; width: 100%; max-width: 420px; border-radius: 12px; padding: 15px; position: relative; max-height: 90vh; overflow-y: auto; }
-    .close-icon { position: absolute; top: 12px; right: 15px; color: #a0aec0; font-size: 20px; cursor: pointer; background: #1a2230; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .brand span {
+      background-color: var(--primary-yellow);
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
 
-    .details-img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; background: #1a2230; display: block; }
-    .details-title { font-size: 15px; color: #fff; margin: 10px 0; line-height: 1.4; font-weight: bold; }
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-    .stat-btn { background: #1a2230; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; text-align: center; color: #a0aec0; font-size: 11px; }
-    .stat-btn i { font-size: 16px; color: #ffcc00; display: block; margin-bottom: 4px; }
-    .stat-btn span { color: #fff; font-weight: bold; display: block; }
-    
-    .action-btn-group { display: flex; gap: 10px; }
-    .btn-like { background: #2d1517; color: #ff4757; border: 1px solid #ff4757; padding: 12px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-download { background: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 25px; flex: 1.5; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; }
+    .container {
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-    .parts-header { text-align: center; color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .instruction-card { background: #1a2230; border-left: 3px solid #ffcc00; padding: 10px; border-radius: 4px; font-size: 11px; color: #cbd5e0; margin-bottom: 15px; line-height: 1.5; }
-    .instruction-card b { color: #ffcc00; }
-    
-    .part-item-btn { background: #121721; border: 1px solid #00b894; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; }
+    /* Search */
+    .search-box {
+      background: #252525;
+      padding: 10px 15px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      border: 1px solid #333;
+    }
 
-    .unlock-icon { text-align: center; font-size: 45px; color: #ffcc00; margin-bottom: 8px; }
-    .unlock-title { text-align: center; color: #fff; font-size: 18px; font-weight: bold; }
-    .unlock-sub { text-align: center; color: #a0aec0; font-size: 12px; margin-bottom: 15px; }
-    .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
-    .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      margin-left: 10px;
+      outline: none;
+      width: 100%;
+    }
 
-    .alert-card { background: #ffffff; color: #000000; border-radius: 16px; padding: 25px 20px 15px; text-align: left; max-width: 320px; margin: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
-    .alert-msg { font-size: 14px; font-weight: 500; color: #2d3748; margin-bottom: 25px; line-height: 1.5; }
-    .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; padding: 5px; }
+    /* Section Title */
+    .section-title {
+      font-size: 16px;
+      color: var(--primary-yellow);
+      margin: 15px 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 1st Page: Video Cards Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .video-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #2a2a2a;
+      cursor: pointer;
+    }
+
+    .thumbnail-box {
+      position: relative;
+      height: 120px;
+      background: #333;
+    }
+
+    .thumbnail-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .badge-parts {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--primary-yellow);
+      border: 1px solid var(--primary-yellow);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .video-info {
+      padding: 8px;
+    }
+
+    .video-title {
+      font-size: 12px;
+      font-weight: 600;
+      height: 32px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* Page View System */
+    .view-page {
+      display: none;
+    }
+
+    .view-page.active {
+      display: block;
+    }
+
+    /* 2nd Page: Details */
+    .details-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .btn-action {
+      background: var(--primary-yellow);
+      color: #000;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Modals (3rd, 4th, 5th, 6th Pages) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 15px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--primary-yellow);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .instruction-box {
+      background: #282815;
+      border-left: 3px solid var(--primary-yellow);
+      padding: 10px;
+      font-size: 12px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+
+    .part-btn {
+      background: #262626;
+      border: 1px solid var(--primary-yellow);
+      color: #fff;
+      padding: 12px;
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .notice-box {
+      background: #2b1f00;
+      border: 1px solid var(--primary-yellow);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #000;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    .nav-item {
+      color: var(--text-muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .nav-item.active {
+      color: var(--primary-yellow);
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      display: block;
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <div class="brand-title">BD VIRAL <span class="brand-badge">LINK</span></div>
-    <a href="#" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
-  </div>
+  <header>
+    <div class="brand">BD VIRAL <span>LINK</span></div>
+  </header>
 
-  <div class="search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" id="searchInput" placeholder="Search Movies, Series, Videos..." onkeyup="filterVideos()">
-  </div>
-  <div class="cat-btn"><i class="fa-solid fa-fire"></i> All Categories (সকল ভিডিও)</div>
-  
-  <div class="tags-container">
-    <div class="tag-chip">💋 Xxx Video</div>
-    <div class="tag-chip">🔞 Hot Series</div>
-    <div class="tag-chip">🔞 Hot Movie</div>
-  </div>
+  <div class="container">
 
-  <div class="section-header"><i class="fa-solid fa-bolt" style="color: #ffcc00;"></i> Trending Now</div>
-  <div class="video-grid" id="mainFeed">
-    <div class="status-msg">No videos found! Upload videos from Admin Panel.</div>
-  </div>
-
-  <!-- Details Modal -->
-  <div class="overlay" id="detailsModal">
-    <div class="modal-box">
-      <span class="close-icon" onclick="hideModal('detailsModal')"><i class="fa-solid fa-xmark"></i></span>
-      <img src="" id="detImg" class="details-img" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/400x200?text=No+Thumbnail'">
-      <div class="details-title" id="detTitle"></div>
-      
-      <div class="stats-row">
-        <div class="stat-btn"><i class="fa-solid fa-heart"></i> <span id="detLikes">0</span> LIKES</div>
-        <div class="stat-btn"><i class="fa-solid fa-download"></i> <span id="detDownloads">0</span> DOWNLOADS</div>
-        <div class="stat-btn"><i class="fa-regular fa-eye"></i> <span id="detViews">0</span> VIEWS</div>
+    <!-- PAGE 1: HOME PAGE -->
+    <div id="page-home" class="view-page active">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+        <input type="text" placeholder="Search Movies, Series, Videos...">
       </div>
 
-      <div class="action-btn-group">
-        <button class="btn-like" onclick="likeVideo()"><i class="fa-solid fa-heart"></i> Like</button>
-        <button class="btn-download" onclick="handleDownloadClick()"><i class="fa-solid fa-circle-down"></i> Download</button>
-      </div>
+      <div class="section-title"><i class="fa-solid fa-fire"></i> Trending Now</div>
+      <div class="video-grid" id="videoGrid"></div>
     </div>
+
+    <!-- PAGE 2: VIDEO DETAILS PAGE -->
+    <div id="page-details" class="view-page">
+      <button onclick="showPage('page-home')" style="background:none; border:none; color:#fff; cursor:pointer; margin-bottom:10px;">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
+      <div id="detailsContent"></div>
+    </div>
+
   </div>
 
-  <!-- Parts List Modal -->
-  <div class="overlay" id="partsModal">
+  <!-- PAGE 3 & 4: PART LIST MODAL -->
+  <div id="partModal" class="modal-overlay">
     <div class="modal-box">
-      <span class="close-icon" onclick="hideModal('partsModal')"><i class="fa-solid fa-xmark"></i></span>
-      <div class="parts-header"><i class="fa-solid fa-cloud-arrow-down" style="color:#e50914;"></i> Select Quality / Part</div>
-      
-      <div class="instruction-card">
-        <b><i class="fa-solid fa-circle-info"></i> How to Download?</b><br>
+      <span class="close-modal" onclick="closeModal('partModal')">&times;</span>
+      <h3 style="color:var(--primary-yellow); text-align:center; margin-bottom:15px;"><i class="fa-solid fa-cloud-arrow-down"></i> Select Quality / Part</h3>
+      <div class="instruction-box">
+        <strong>How to Download?</strong><br>
         1. Select any quality or part below.<br>
-        2. Wait for <b id="insDuration">10 seconds</b> on the opened link.<br>
-        3. Return to the app to automatically receive the file in your Bot!
+        2. Wait for <strong>10 seconds</strong> on the opened link.<br>
+        3. Return to the app to automatically receive the file!
       </div>
-
-      <div id="partsList"></div>
+      <div id="partList"></div>
     </div>
   </div>
 
-  <!-- Ads Unlock Modal -->
-  <div class="overlay" id="unlockModal">
+  <!-- PAGE 5: AD UNLOCK MODAL -->
+  <div id="unlockModal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+      <span class="close-modal" onclick="closeModal('unlockModal')">&times;</span>
+      <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--primary-yellow); margin-bottom: 10px;"></i>
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">Unlock Your Video</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">ভিডিও আনলক করুন</div>
+
+      <div class="instruction-box" style="text-align: left;">
+        <p>⏱️ <strong id="reqSecText">10 সেকেন্ডের</strong> একটি বিজ্ঞাপন দেখতে হবে। যদি না দেখেন, আপনার কাঙ্ক্ষিত ভিডিও পাবেন না।</p>
+        <p style="margin-top: 5px;">• নিচের বাটনে ক্লিক করুন এবং কমপক্ষে <strong id="reqSecText2">10 সেকেন্ড</strong> সেই পেজে থাকুন, তারপর ফিরে আসুন।</p>
+      </div>
+
+      <div style="background: #2d1818; color: #ff6b6b; padding: 8px; font-size: 11px; border-radius: 4px; margin-bottom: 15px;">
+        ⚠️ <span id="reqSecText3">10 সেকেন্ডের</span> আগে ফিরে আসলে ভিডিও পাঠানো হবে না।
+      </div>
+
+      <button class="btn-action" onclick="startAdProcess()">
+        🎬 বিজ্ঞাপন দেখুন & ভিডিও আনলক করুন
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE 6: WARNING NOTICE MODAL -->
+  <div id="noticeModal" class="modal-overlay">
     <div class="modal-box">
-      <span class="close-icon" onclick="hideModal('unlockModal')"><i class="fa-solid fa-xmark"></i></span>
-      <div class="unlock-icon"><i class="fa-solid fa-lock"></i></div>
-      <div class="unlock-title">Unlock Your Video</div>
-      <div class="unlock-sub">ভিডিও আনলক করুন</div>
-
-      <div class="instruction-card">
-        <b style="color: #ffcc00;"><i class="fa-regular fa-clock"></i> <span id="adNoticeTime">10</span> সেকেন্ডের একটি বিজ্ঞাপন দেখতে হবে।</b><br>
-        যদি না দেখেন, আপনার কাঙ্ক্ষিত ভিডিও পাবেন না।<br>
-        • নিচের বাটনে ক্লিক করুন এবং <b>কমপক্ষে <span id="adNoticeTime2">10</span> সেকেন্ড</b> সেই পেজে থাকুন, তারপর ফিরে আসুন।
+      <div class="notice-box" id="noticeMessage">
+        ⚠️ You must wait full 10 seconds on the link. 6s remaining.
       </div>
-
-      <div class="alert-notice">
-        <i class="fa-solid fa-triangle-exclamation"></i> <span id="adNoticeTime3">10</span> সেকেন্ডের আগে ফিরে আসলে ভিডিও পাঠানো হবে না।
-      </div>
-
-      <button class="btn-watch-ad" onclick="triggerAdView()"><i class="fa-solid fa-clapperboard"></i> বিজ্ঞাপন দেখুন & ভিডিও আনলক করুন</button>
+      <button class="btn-action" style="margin-top: 15px;" onclick="closeModal('noticeModal')">Close</button>
     </div>
   </div>
 
-  <!-- Screenshot Exact Alert Notice Dialog Modal -->
-  <div class="overlay" id="noticeModal" style="z-index: 2000;">
-    <div class="alert-card">
-      <div class="alert-msg" id="noticeMsg">⚠️ You must wait full 10 seconds on the link. 6s remaining.</div>
-      <button class="btn-alert-close" onclick="hideModal('noticeModal')">Close</button>
-      <div style="clear: both;"></div>
+  <!-- SUCCESS TELEGRAM BOT MSG MODAL -->
+  <div id="successModal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+      <i class="fa-solid fa-circle-check" style="font-size: 45px; color: #00ff66; margin-bottom: 10px;"></i>
+      <h3 style="margin-bottom: 10px;">Video Sent to Bot!</h3>
+      <p id="successMsg" style="font-size: 12px; color: #ddd; background: #222; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 15px; text-align: left;"></p>
+      <button class="btn-action" onclick="closeModal('successModal')">OK</button>
     </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active"><i class="fa-solid fa-house"></i>Home</div>
+    <div class="nav-item"><i class="fa-solid fa-fire"></i>Trending</div>
+    <div class="nav-item"><i class="fa-solid fa-bookmark"></i>Saved</div>
+    <div class="nav-item"><i class="fa-solid fa-user"></i>Profile</div>
   </div>
 
   <script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) tg.ready();
-
-    const BOT_TOKEN = "8908636574:AAE23EW6gLUpBO7tRDnjzTb6OYUdWQkfneQ";
-
-    // Updated Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
-      authDomain: "first-app-c33be.firebaseapp.com",
-      databaseURL: "https://first-app-c33be-default-rtdb.firebaseio.com",
-      projectId: "first-app-c33be",
-      storageBucket: "first-app-c33be.firebasestorage.app",
-      messagingSenderId: "179840421702",
-      appId: "1:179840421702:web:2540c2b4ee48baec849f47",
-      measurementId: "G-VCMH0W3MJP"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let globalVideos = [];
-    let activeVideo = null;
-    let selectedPartIndex = 0;
-    let selectedPartUrl = "";
-    let adWatchStartTime = 0;
-    let adsCountWatched = 0;
-
-    const videoRef = db.ref('videos');
-    
-    videoRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      globalVideos = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          globalVideos.push({ id: key, ...data[key] });
-        });
+    // Default Fallback Data
+    const defaultData = [
+      {
+        id: 1,
+        title: "একদম পুরা প্রিমিয়াম বাছাই করা ২২ টা ভিডিও কালেকশন",
+        img: "https://via.placeholder.com/300x200/222/ffcc00?text=22+Parts+Collection",
+        parts: 5,
+        adLimit: 1,
+        adDuration: 10,
+        adLink: "https://www.google.com"
       }
-      renderAppFeed(globalVideos);
-    }, (error) => {
-      console.error(error);
-      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase Rules!</div>';
-    });
+    ];
 
-    function renderAppFeed(videos) {
-      const feed = document.getElementById('mainFeed');
-      if (videos.length === 0) {
-        feed.innerHTML = '<div class="status-msg">No videos found! Upload videos from Admin Panel first.</div>';
-        return;
-      }
-      feed.innerHTML = '';
-      videos.forEach((vid, idx) => {
-        const partsCount = vid.parts ? vid.parts.length : 1;
-        const thumbUrl = vid.thumbnail || vid.thumb || vid.img || vid.image || 'https://via.placeholder.com/300x200?text=No+Thumbnail';
-        const views = vid.views || 0;
+    let videoList = JSON.parse(localStorage.getItem('app_videos')) || defaultData;
+    let selectedVideo = null;
+    let selectedPartNum = 1;
+    let adStartTime = null;
 
-        feed.innerHTML += `
-          <div class="video-card" onclick="showDetails('${vid.id}', ${idx})">
-            <div class="thumb-wrapper">
-              <span class="badge-top">🔥 TOP</span>
-              <span class="badge-parts"><i class="fa-solid fa-list-ul"></i> ${partsCount} ${partsCount > 1 ? 'Parts' : 'Part'}</span>
-              <img src="${thumbUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=No+Thumbnail';">
-              <span class="views-count"><i class="fa-regular fa-eye"></i> ${views} Views</span>
+    function renderVideos() {
+      const grid = document.getElementById('videoGrid');
+      grid.innerHTML = '';
+      videoList.forEach(video => {
+        grid.innerHTML += `
+          <div class="video-card" onclick="openVideoDetails(${video.id})">
+            <div class="thumbnail-box">
+              <img src="${video.img}" alt="thumbnail">
+              <span class="badge-parts"><i class="fa-solid fa-list"></i> ${video.parts} Part${video.parts > 1 ? 's' : ''}</span>
             </div>
-            <div class="card-info">
-              <div class="card-avatar">BD</div>
-              <div class="card-title">${vid.title}</div>
+            <div class="video-info">
+              <div class="video-title">${video.title}</div>
             </div>
           </div>
         `;
       });
     }
 
-    window.filterVideos = function() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = globalVideos.filter(v => v.title.toLowerCase().includes(query));
-      renderAppFeed(filtered);
-    };
+    function showPage(pageId) {
+      document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
 
-    window.showDetails = function(vidId, index) {
-      activeVideo = globalVideos[index];
-      adsCountWatched = 0; 
-      
-      const currentViews = (activeVideo.views || 0) + 1;
-      db.ref('videos/' + vidId).update({ views: currentViews });
+    function openVideoDetails(id) {
+      selectedVideo = videoList.find(v => v.id === id);
+      const container = document.getElementById('detailsContent');
+      container.innerHTML = `
+        <img class="details-img" src="${selectedVideo.img}" alt="Video Detail Image">
+        <h2 style="font-size: 16px; margin: 15px 0;">${selectedVideo.title}</h2>
+        <button class="btn-action" onclick="handleDownloadClick()">
+          <i class="fa-solid fa-download"></i> Download
+        </button>
+      `;
+      showPage('page-details');
+    }
 
-      const thumbUrl = activeVideo.thumbnail || activeVideo.thumb || activeVideo.img || activeVideo.image || 'https://via.placeholder.com/400x200?text=No+Thumbnail';
-      document.getElementById('detImg').src = thumbUrl;
-      document.getElementById('detTitle').innerText = activeVideo.title;
-      document.getElementById('detLikes').innerText = activeVideo.likes || 0;
-      document.getElementById('detDownloads').innerText = activeVideo.downloads || 0;
-      document.getElementById('detViews').innerText = currentViews;
+    function handleDownloadClick() {
+      const partList = document.getElementById('partList');
+      partList.innerHTML = '';
 
-      document.getElementById('detailsModal').style.display = 'flex';
-    };
-
-    window.likeVideo = function() {
-      if(!activeVideo) return;
-      const newLikes = (activeVideo.likes || 0) + 1;
-      activeVideo.likes = newLikes;
-      document.getElementById('detLikes').innerText = newLikes;
-      db.ref('videos/' + activeVideo.id).update({ likes: newLikes });
-    };
-
-    window.handleDownloadClick = function() {
-      if(!activeVideo) return;
-      
-      const newDownloads = (activeVideo.downloads || 0) + 1;
-      activeVideo.downloads = newDownloads;
-      document.getElementById('detDownloads').innerText = newDownloads;
-      db.ref('videos/' + activeVideo.id).update({ downloads: newDownloads });
-
-      hideModal('detailsModal');
-      const partsContainer = document.getElementById('partsList');
-      partsContainer.innerHTML = '';
-
-      const reqTime = parseInt(activeVideo.adDuration) || 10;
-      document.getElementById('insDuration').innerText = reqTime + " seconds";
-
-      const parts = activeVideo.parts || [];
-      parts.forEach((partUrl, pIdx) => {
-        partsContainer.innerHTML += `
-          <div class="part-item-btn" onclick="choosePart('${partUrl}', ${pIdx})">
-            <span><i class="fa-solid fa-download"></i> Video Part ${pIdx + 1} [HD]</span>
-            <i class="fa-solid fa-lock" style="color:#a0aec0;"></i>
+      for (let i = 1; i <= selectedVideo.parts; i++) {
+        partList.innerHTML += `
+          <div class="part-btn" onclick="openUnlockModal(${i})">
+            <span><i class="fa-solid fa-download"></i> Video Part ${i} [HD]</span>
+            <i class="fa-solid fa-lock" style="color:var(--primary-yellow)"></i>
           </div>
         `;
-      });
-      document.getElementById('partsModal').style.display = 'flex';
-    };
+      }
+      openModal('partModal');
+    }
 
-    window.choosePart = function(url, pIdx) {
-      selectedPartUrl = url;
-      selectedPartIndex = pIdx;
-      hideModal('partsModal');
-      
-      const reqTime = parseInt(activeVideo.adDuration) || 10;
-      document.getElementById('adNoticeTime').innerText = reqTime;
-      document.getElementById('adNoticeTime2').innerText = reqTime;
-      document.getElementById('adNoticeTime3').innerText = reqTime;
+    function openUnlockModal(partNum) {
+      selectedPartNum = partNum;
+      closeModal('partModal');
 
-      document.getElementById('unlockModal').style.display = 'flex';
-    };
+      const dur = selectedVideo.adDuration || 10;
+      document.getElementById('reqSecText').innerText = dur + " সেকেন্ডের";
+      document.getElementById('reqSecText2').innerText = dur + " সেকেন্ড";
+      document.getElementById('reqSecText3').innerText = dur + " সেকেন্ডের";
 
-    window.triggerAdView = function() {
-      adWatchStartTime = Date.now();
-      const adUrl = activeVideo.adLink || "https://www.google.com";
-      window.open(adUrl, '_blank');
-    };
+      openModal('unlockModal');
+    }
 
-    window.addEventListener("focus", function() {
-      if (adWatchStartTime > 0) {
-        let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
-        let requiredTime = parseInt(activeVideo.adDuration) || 10;
-        let requiredLimit = parseInt(activeVideo.adLimit) || 1;
+    function startAdProcess() {
+      adStartTime = new Date().getTime();
+      window.open(selectedVideo.adLink, '_blank');
+      closeModal('unlockModal');
 
-        if (timeSpent < requiredTime) {
-          let remaining = requiredTime - timeSpent;
-          document.getElementById('noticeMsg').innerText = `⚠️ You must wait full ${requiredTime} seconds on the link. ${remaining}s remaining.`;
-          document.getElementById('noticeModal').style.display = 'flex';
-        } else {
-          adsCountWatched++;
-          if (adsCountWatched < requiredLimit) {
-            let left = requiredLimit - adsCountWatched;
-            document.getElementById('noticeMsg').innerText = `✅ Ads ${adsCountWatched} viewed! Please watch ${left} more ads to unlock.`;
-            document.getElementById('noticeModal').style.display = 'flex';
-          } else {
-            hideModal('unlockModal');
+      window.removeEventListener('focus', checkAdCompletion);
+      window.addEventListener('focus', checkAdCompletion, { once: true });
+    }
 
-            const userId = tg?.initDataUnsafe?.user?.id || "6489017273";
-            const messageText = `🎬 *${activeVideo.title}* [Part ${selectedPartIndex + 1}]\n\n🔗 Video Link: ${selectedPartUrl}\n\n💬 Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
+    function checkAdCompletion() {
+      if (!adStartTime) return;
 
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: userId,
-                text: messageText,
-                parse_mode: 'Markdown'
-              })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if(data.ok) {
-                if (tg && tg.close) tg.close();
-                else alert("✅ Success! Video sent to your Telegram Bot inbox.");
-              } else {
-                alert("⚠️ Vid
+      const currentTime = new Date().getTime();
+      const elapsedSeconds = Math.floor((currentTime - adStartTime) / 1000);
+      const requiredDuration = selectedVideo.adDuration || 10;
+
+      if (elapsedSeconds < requiredDuration) {
+        const remaining = requiredDuration - elapsedSeconds;
+        document.getElementById('noticeMessage').innerText = `⚠️ You must wait full ${requiredDuration} seconds on the link. ${remaining}s remaining.`;
+        openModal('noticeModal');
+      } else {
+        const successText = `Video Part ${selectedPartNum} processing completed!\n\nVideo ti kmn laglo and video ti valo lagle bondhuder majhe share korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
+        document.getElementById('successMsg').innerText = successText;
+        openModal('successModal');
+      }
+      adStartTime = null;
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    renderVideos();
+  </script>
+</body>
+</html>
