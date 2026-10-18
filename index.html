@@ -6,7 +6,7 @@
   <title>BD Viral Link</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Firebase App & Realtime Database CDN (v8 Compat) -->
+  <!-- Firebase App & Realtime Database CDN (v8 Compat for Instant Loading) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <!-- Font Awesome Icons -->
@@ -196,7 +196,6 @@
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
-    // Safety Timeout Handler (Prevents endless loading loop)
     let loadTimer = setTimeout(() => {
       const feed = document.getElementById('mainFeed');
       if (feed && feed.innerHTML.includes("Loading Videos...")) {
@@ -204,7 +203,6 @@
       }
     }, 4000);
 
-    // Fetch Database Data via Direct REST / Realtime Listener
     const videoRef = db.ref('videos');
     
     videoRef.on('value', (snapshot) => {
@@ -351,4 +349,6 @@
             const userId = tg?.initDataUnsafe?.user?.id || "6489017273";
             const messageText = `🎬 *${activeVideo.title}* [Part ${selectedPartIndex + 1}]\n\n🔗 Video Link: ${selectedPartUrl}\n\n💬 Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
 
-            fetch(`https://api.telegram.org
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': '
