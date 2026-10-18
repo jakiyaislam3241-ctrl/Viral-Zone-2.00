@@ -11,7 +11,6 @@
     header { background-color: #121212; padding: 15px; text-align: center; border-bottom: 2px solid #ffcc00; margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #ffcc00; }
     
     .container { max-width: 600px; margin: 0 auto; }
-    
     .admin-card { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ffcc00; margin-bottom: 30px; }
     
     .form-group { margin-bottom: 15px; }
@@ -21,8 +20,8 @@
     
     .btn-submit { background: #ffcc00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .btn-submit:hover { background: #e6b800; }
+    .btn-submit:disabled { background: #776100; color: #888; cursor: not-allowed; }
 
-    /* Uploaded List & Edit Section */
     .section-title { font-size: 18px; color: #ffcc00; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
     
     .video-item { background: #181818; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -48,7 +47,7 @@
     <!-- UPLOAD FORM -->
     <div class="admin-card">
       <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload New Video</h3>
-      <form id="adminForm" onsubmit="uploadToFirebase(event)">
+      <form id="adminForm">
         
         <div class="form-group">
           <label>1. VIDEO TITLE</label>
@@ -101,31 +100,40 @@
       projectId: "first-app-c33be",
       storageBucket: "first-app-c33be.firebasestorage.app",
       messagingSenderId: "179840421702",
-      appId: "1:179840421702:web:2540c2b4ee48baec849f47",
-      measurementId: "G-VCMH0W3MJP"
+      appId: "1:179840421702:web:2540c2b4ee48baec849f47"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Fast 2-Second Upload Function
-    window.uploadToFirebase = async function(event) {
+    const adminForm = document.getElementById('adminForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Fixed Fast 2-Second Upload Event
+    adminForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-      const fileInput = document.getElementById('adminVideoFile');
       
+      const fileInput = document.getElementById('adminVideoFile');
       if(!fileInput.files || fileInput.files.length === 0) {
         alert("Please select a video file!");
         return;
       }
 
-      submitBtn.innerText = "Uploading...";
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
       submitBtn.disabled = true;
 
-      try {
-        // Getting pure text name of file to prevent object serialization hang
-        const fileName = fileInput.files[0].name;
+      const fileName = fileInput.files[0].name;
 
+      // Timeout Fallback Safety
+      const timer = setTimeout(() => {
+        if(submitBtn.disabled) {
+          submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload Video';
+          submitBtn.disabled = false;
+          alert("Upload Timeout! Check Firebase Firestore Rules settings in Console.");
+        }
+      }, 8000);
+
+      try {
         await addDoc(collection(db, "videos"), {
           title: document.getElementById('adminTitle').value.trim(),
           img: document.getElementById('adminImg').value.trim(),
@@ -136,17 +144,19 @@
           createdAt: Date.now()
         });
 
-        alert("Video uploaded successfully in 2 seconds!");
-        document.getElementById('adminForm').reset();
+        clearTimeout(timer);
+        alert("Video uploaded successfully!");
+        adminForm.reset();
         loadUploadedVideos();
       } catch (error) {
-        console.error("Error uploading: ", error);
-        alert("Upload failed! Error: " + error.message);
+        clearTimeout(timer);
+        console.error("Firebase Error: ", error);
+        alert("Upload Failed! Karon: " + error.message);
       } finally {
-        submitBtn.innerText = "Upload Video";
+        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload Video';
         submitBtn.disabled = false;
       }
-    }
+    });
 
     // Fetch & Display Uploaded Videos
     async function loadUploadedVideos() {
@@ -175,7 +185,6 @@
                 </div>
               </div>
 
-              <!-- EDIT INPUTS -->
               <div class="edit-inputs">
                 <div>
                   <label style="font-size:10px; color:#ffcc00;">EDIT TITLE</label>
@@ -191,7 +200,6 @@
                 </div>
               </div>
 
-              <!-- ACTION BUTTONS -->
               <div class="action-btns">
                 <button class="btn-update" onclick="updateVideo('${docId}')"><i class="fa-solid fa-floppy-disk"></i> Save Edit</button>
                 <button class="btn-delete" onclick="deleteVideo('${docId}')"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -201,11 +209,11 @@
         });
       } catch (error) {
         console.error("Load error:", error);
-        container.innerHTML = '<div style="text-align:center; color:#ff5555;">Error loading list. Check console.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#ff5555;">Error loading list. Check Rules in Firebase Console.</div>';
       }
     }
 
-    // Save Edit Function
+    // Edit Function
     window.updateVideo = async function(docId) {
       const newTitle = document.getElementById(`title-${docId}`).value;
       const newLimit = Number(document.getElementById(`limit-${docId}`).value);
@@ -226,7 +234,7 @@
       }
     }
 
-    // Delete Video Function
+    // Delete Function
     window.deleteVideo = async function(docId) {
       if(!confirm("Are you sure you want to delete this video?")) return;
 
@@ -240,7 +248,7 @@
       }
     }
 
-    // Initial Load
+    // Load initial list
     loadUploadedVideos();
   </script>
 </body>
