@@ -93,6 +93,7 @@
         if (tg) tg.expand();
 
         const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
+        const JSONBIN_API_KEY = "$2a$10$8kiSHCANxWYonMv7vhymkueXNd2sTQrD.OnnLIqrKkhB0i1.FtXOK";
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
@@ -104,32 +105,38 @@
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
             
             try {
-                // Using JSONBin public/raw endpoint proxy free
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest?meta=false`);
-                if (!res.ok) throw new Error("Network response was not ok");
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
                 
+                if (!res.ok) throw new Error("API Error");
+
                 const data = await res.json();
+                let record = data.record || data;
                 
-                if (data) {
-                    let record = data.record || data;
-                    adLink = record.adLink || adLink;
-                    timerSeconds = record.adTimer || timerSeconds;
-                    sampleVideos = record.videos || [];
-                    renderVideos(sampleVideos);
-                }
+                adLink = record.adLink || adLink;
+                timerSeconds = record.adTimer || timerSeconds;
+                sampleVideos = record.videos || [];
+                renderVideos(sampleVideos);
+
             } catch (e) {
-                console.error("Fetch Error:", e);
-                // Fallback using allorigins proxy if direct fails
+                console.error("Direct fetch failed, trying proxy...", e);
+                // Fallback using CORS Proxy
                 try {
-                    const proxyRes = await fetch(`https://api.allorigins.win/raw?url=https%3A%2F%2Fapi.jsonbin.io%2Fv3%2Fb%2F${JSONBIN_BIN_ID}%2Flatest`);
+                    const proxyRes = await fetch(`https://api.codetabs.com/v1/proxy?quest=https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                    });
                     const proxyData = await proxyRes.json();
                     let record = proxyData.record || proxyData;
+                    
                     adLink = record.adLink || adLink;
                     timerSeconds = record.adTimer || timerSeconds;
                     sampleVideos = record.videos || [];
                     renderVideos(sampleVideos);
                 } catch (err) {
-                    container.innerHTML = "<p style='grid-column:1/-1; test-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
+                    container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
                 }
             }
         }
