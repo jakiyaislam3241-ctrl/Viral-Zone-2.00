@@ -6,149 +6,91 @@
   <title>Admin Panel - BD Viral Link</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #0d0d0d;
-      color: #ffffff;
-      padding: 20px;
-    }
-
-    header {
-      background-color: #121212;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 2px solid #ffcc00;
-      margin-bottom: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #ffcc00;
-    }
-
-    .admin-card {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #ffcc00;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      color: #ffcc00;
-      margin-bottom: 5px;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 10px;
-      background: #111;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 5px;
-      outline: none;
-    }
-
-    .form-group input:focus {
-      border-color: #ffcc00;
-    }
-
-    .btn-submit {
-      background: #ffcc00;
-      color: #000;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .btn-submit:hover {
-      background: #e6b800;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0d0d0d; color: #ffffff; padding: 20px; }
+    header { background-color: #121212; padding: 15px; text-align: center; border-bottom: 2px solid #ffcc00; margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #ffcc00; }
+    .admin-card { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ffcc00; max-width: 500px; margin: 0 auto; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; color: #ffcc00; margin-bottom: 5px; }
+    .form-group input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; outline: none; }
+    .form-group input:focus { border-color: #ffcc00; }
+    .btn-submit { background: #ffcc00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn-submit:hover { background: #e6b800; }
   </style>
 </head>
 <body>
 
-  <header>
-    <i class="fa-solid fa-user-gear"></i> Admin Panel
-  </header>
+  <header><i class="fa-solid fa-user-gear"></i> Admin Panel</header>
 
   <div class="admin-card">
-    <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload New Content</h3>
-    <form id="adminForm" onsubmit="handleUpload(event)">
+    <h3 style="color:#ffcc00; margin-bottom: 20px; text-align: center;">Upload New Content to Firebase</h3>
+    <form id="adminForm">
       <div class="form-group">
         <label>Thumbnail Image Link (URL)</label>
         <input type="url" id="adminImg" placeholder="https://example.com/image.jpg" required>
       </div>
-
       <div class="form-group">
         <label>Video Title</label>
-        <input type="text" id="adminTitle" placeholder="Enter title" required>
+        <input type="text" id="adminTitle" placeholder="Enter video title" required>
       </div>
-
       <div class="form-group">
         <label>Number of Parts / Videos</label>
         <input type="number" id="adminParts" min="1" max="20" value="1" required>
       </div>
-
       <div class="form-group">
         <label>Ads Limit (e.g. 1, 2, 3)</label>
         <input type="number" id="adminAdLimit" min="1" value="1" required>
       </div>
-
       <div class="form-group">
         <label>Ads Duration (Seconds)</label>
         <input type="number" id="adminAdDuration" min="1" value="10" required>
       </div>
-
       <div class="form-group">
         <label>Adsterra Direct Link</label>
         <input type="url" id="adminAdLink" placeholder="https://www.adsterra.com/direct-link" required>
       </div>
-
-      <button type="submit" class="btn-submit">
-        <i class="fa-solid fa-cloud-arrow-up"></i> Upload to User Panel
-      </button>
+      <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Data</button>
     </form>
   </div>
 
-  <script>
-    function handleUpload(event) {
-      event.preventDefault();
+  <!-- Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-      let videoList = JSON.parse(localStorage.getItem('app_videos')) || [];
+    const firebaseConfig = {
+      apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
+      authDomain: "first-app-c33be.firebaseapp.com",
+      projectId: "first-app-c33be",
+      storageBucket: "first-app-c33be.firebasestorage.app",
+      messagingSenderId: "179840421702",
+      appId: "1:179840421702:web:2540c2b4ee48baec849f47",
+      measurementId: "G-VCMH0W3MJP"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById('adminForm').addEventListener('submit', function(e) {
+      e.preventDefault();
 
       const newVideo = {
-        id: Date.now(),
         img: document.getElementById('adminImg').value,
         title: document.getElementById('adminTitle').value,
         parts: parseInt(document.getElementById('adminParts').value),
         adLimit: parseInt(document.getElementById('adminAdLimit').value),
         adDuration: parseInt(document.getElementById('adminAdDuration').value),
-        adLink: document.getElementById('adminAdLink').value
+        adLink: document.getElementById('adminAdLink').value,
+        createdAt: Date.now()
       };
 
-      videoList.unshift(newVideo);
-      localStorage.setItem('app_videos', JSON.stringify(videoList));
-
-      alert("Video successfully uploaded!");
-      document.getElementById('adminForm').reset();
-    }
+      push(ref(db, 'videos'), newVideo).then(() => {
+        alert("Video Uploaded Successfully to Firebase!");
+        document.getElementById('adminForm').reset();
+      }).catch((error) => {
+        alert("Error: " + error.message);
+      });
+    });
   </script>
 </body>
 </html>
