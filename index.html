@@ -105,11 +105,10 @@
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
             
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                    method: 'GET',
+                const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`);
+                const res = await fetch(proxyUrl, {
                     headers: {
-                        'X-Master-Key': JSONBIN_API_KEY,
-                        'X-Bin-Meta': 'false'
+                        'X-Master-Key': JSONBIN_API_KEY
                     }
                 });
 
@@ -126,7 +125,7 @@
                 }
             } catch (e) {
                 console.error("Fetch Error:", e);
-                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try করুন।</p>";
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
             }
         }
 
