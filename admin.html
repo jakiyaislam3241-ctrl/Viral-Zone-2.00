@@ -22,7 +22,6 @@
     .btn-upload { background: #ffcc00; color: #000; font-weight: bold; border: none; padding: 14px; width: 100%; border-radius: 6px; font-size: 16px; margin-top: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-upload:hover { background: #e6b800; }
 
-    /* Video List Section */
     .list-card { background: #121721; border: 1px solid #2d3748; max-width: 650px; margin: 0 auto; padding: 20px; border-radius: 12px; }
     .list-header { color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #2d3748; padding-bottom: 8px; }
     
@@ -37,14 +36,12 @@
     .btn-edit { background: #ffcc00; color: #000; }
     .btn-delete { background: #ff4757; color: #fff; }
 
-    /* Edit Overlay Modal */
     .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:1000; padding:15px; }
     .modal-box { background:#121721; border:1px solid #ffcc00; width:100%; max-width:500px; padding:20px; border-radius:10px; }
   </style>
 </head>
 <body>
 
-  <!-- Upload Form -->
   <div class="admin-card">
     <h2><i class="fa-solid fa-user-shield"></i> Admin Control Panel</h2>
     
@@ -85,7 +82,6 @@
     </form>
   </div>
 
-  <!-- Manage Videos Section -->
   <div class="list-card">
     <div class="list-header"><i class="fa-solid fa-list"></i> Uploaded Videos List</div>
     <div id="videoListContainer">
@@ -93,7 +89,6 @@
     </div>
   </div>
 
-  <!-- Edit Video Modal -->
   <div class="modal-overlay" id="editModal">
     <div class="modal-box">
       <h3 style="color:#ffcc00; margin-bottom:15px;"><i class="fa-solid fa-pen-to-square"></i> Edit Video Details</h3>
@@ -116,12 +111,10 @@
     </div>
   </div>
 
-  <!-- Firebase Admin Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
       authDomain: "viral-zone-f39b4.firebaseapp.com",
@@ -138,7 +131,6 @@
 
     let allVideos = {};
 
-    // Upload Video
     document.getElementById('adminForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -174,7 +166,6 @@
         });
     });
 
-    // Render Video List in Admin Panel
     const videoRef = ref(db, 'videos');
     onValue(videoRef, (snapshot) => {
       allVideos = snapshot.val() || {};
@@ -190,7 +181,7 @@
       keys.forEach((key) => {
         const item = allVideos[key];
         const partsCount = item.parts ? item.parts.length : 1;
-        const thumb = item.thumbnail || 'https://via.placeholder.com/60x45?text=No+Img';
+        const thumb = item.thumbnail || item.thumb || 'https://via.placeholder.com/60x45?text=No+Img';
 
         container.innerHTML += `
           <div class="item-row">
@@ -208,7 +199,6 @@
       });
     });
 
-    // Delete Video Function
     window.deleteVideo = function(key) {
       if (confirm('Are you sure you want to delete this video?')) {
         remove(ref(db, 'videos/' + key))
@@ -217,17 +207,15 @@
       }
     };
 
-    // Open Edit Modal
     window.openEditModal = function(key) {
       const item = allVideos[key];
       if (!item) return;
       document.getElementById('editKey').value = key;
       document.getElementById('editTitle').value = item.title || '';
-      document.getElementById('editThumb').value = item.thumbnail || '';
+      document.getElementById('editThumb').value = item.thumbnail || item.thumb || '';
       document.getElementById('editModal').style.display = 'flex';
     };
 
-    // Save Edit
     window.saveVideoEdit = function() {
       const key = document.getElementById('editKey').value;
       const newTitle = document.getElementById('editTitle').value;
