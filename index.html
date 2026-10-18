@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BD Viral Link</title>
+  <!-- Telegram Mini App WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -15,20 +17,20 @@
     .brand-title { color: #fff; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
     .brand-badge { background: #e50914; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
 
-    /* Category & Search Filter */
+    /* Search Bar */
     .search-box { margin: 12px 15px; background: #1a2230; border-radius: 20px; padding: 10px 15px; display: flex; align-items: center; gap: 10px; color: #8a99ad; font-size: 14px; }
     .cat-btn { background: #e50914; color: #fff; text-align: center; padding: 10px; margin: 0 15px 12px; border-radius: 8px; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     
     .tags-container { display: flex; gap: 8px; padding: 0 15px 15px; overflow-x: auto; }
     .tag-chip { background: #1a2230; color: #ffcc00; padding: 6px 12px; border-radius: 15px; font-size: 12px; white-space: nowrap; border: 1px solid #2d3748; }
 
-    /* Video Cards Grid */
+    /* Video Feed Grid */
     .section-header { padding: 5px 15px 10px; font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
     .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 15px; }
     
     .video-card { background: #121721; border-radius: 10px; overflow: hidden; position: relative; border: 1px solid #1f2937; cursor: pointer; }
-    .thumb-wrapper { position: relative; width: 100%; height: 110px; }
-    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-wrapper { position: relative; width: 100%; height: 110px; background: #1a2230; }
+    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .badge-top { position: absolute; top: 6px; left: 6px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
     .badge-parts { position: absolute; top: 6px; right: 6px; background: #00b894; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
     .views-count { position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.7); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
@@ -37,13 +39,16 @@
     .card-avatar { width: 24px; height: 24px; background: #e50914; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; flex-shrink: 0; }
     .card-title { font-size: 12px; color: #e2e8f0; line-height: 1.3; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-    /* Popups & Modals (Black & Yellow Theme) */
+    /* Empty state */
+    .no-data { text-align: center; color: #718096; padding: 40px 15px; grid-column: 1 / -1; font-size: 14px; }
+
+    /* Modals & Overlays */
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
     .modal-box { background: #121721; border: 1px solid #ffcc00; width: 100%; max-width: 420px; border-radius: 12px; padding: 15px; position: relative; max-height: 90vh; overflow-y: auto; }
     .close-icon { position: absolute; top: 12px; right: 15px; color: #a0aec0; font-size: 20px; cursor: pointer; background: #1a2230; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-    /* Page 2: Details Modal UI */
-    .details-img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+    /* Details Modal UI */
+    .details-img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; background: #1a2230; }
     .details-title { font-size: 15px; color: #fff; margin: 12px 0; line-height: 1.4; font-weight: bold; }
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
     .stat-btn { background: #1a2230; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; text-align: center; color: #a0aec0; font-size: 11px; }
@@ -54,32 +59,29 @@
     .btn-like { background: #2d1517; color: #ff4757; border: 1px solid #ff4757; padding: 12px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-download { background: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 25px; flex: 1.5; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; }
 
-    /* Page 3 & 4: Select Parts List UI */
+    /* Select Parts List UI */
     .parts-header { text-align: center; color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .instruction-card { background: #1a2230; border-left: 3px solid #ffcc00; padding: 10px; border-radius: 4px; font-size: 11px; color: #cbd5e0; margin-bottom: 15px; line-height: 1.5; }
     .instruction-card b { color: #ffcc00; }
     
     .part-item-btn { background: #121721; border: 1px solid #00b894; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .part-item-btn i { color: #a0aec0; }
 
-    /* Page 5: Unlock Page Requirement UI */
+    /* Unlock Page UI */
     .unlock-icon { text-align: center; font-size: 45px; color: #ffcc00; margin-bottom: 8px; }
     .unlock-title { text-align: center; color: #fff; font-size: 18px; font-weight: bold; }
     .unlock-sub { text-align: center; color: #a0aec0; font-size: 12px; margin-bottom: 15px; }
     .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
     .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
 
-    /* Page 6: Alert / Notice Modal */
+    /* Alert Modal */
     .alert-card { background: #ffffff; color: #000000; border-radius: 12px; padding: 20px; text-align: center; max-width: 300px; margin: auto; }
     .alert-msg { font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 15px; line-height: 1.4; }
     .btn-alert-close { background: #2b6cb0; color: #fff; border: none; padding: 8px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-    /* Final Video Player & Security Notice */
-    .video-box { width: 100%; border-radius: 8px; overflow: hidden; background: #000; }
-    .video-box video { width: 100%; display: block; }
-    .sec-notice-msg { background: #1a2230; border-left: 3px solid #ffcc00; padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 12px; color: #e2e8f0; line-height: 1.5; }
+    /* Final Message UI */
+    .sec-notice-msg { background: #1a2230; border-left: 3px solid #ffcc00; padding: 12px; border-radius: 6px; margin-top: 12px; font-size: 12px; color: #e2e8f0; line-height: 1.5; }
 
-    /* Bottom Nav Bar */
+    /* Bottom Navigation */
     .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #121721; border-top: 1px solid #1f2937; display: flex; justify-content: space-around; padding: 8px 0; z-index: 900; }
     .nav-item { text-align: center; color: #718096; text-decoration: none; font-size: 10px; }
     .nav-item i { font-size: 18px; display: block; margin-bottom: 2px; }
@@ -94,7 +96,7 @@
     <div style="background: #e50914; color: #fff; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;"><i class="fa-solid fa-house"></i> Home</div>
   </div>
 
-  <!-- Search & Categories Bar -->
+  <!-- Search Bar -->
   <div class="search-box">
     <i class="fa-solid fa-magnifying-glass"></i> Search Movies, Series, Videos...
   </div>
@@ -108,24 +110,26 @@
 
   <!-- Video Grid Container -->
   <div class="section-header"><i class="fa-solid fa-bolt" style="color: #ffcc00;"></i> Trending Now</div>
-  <div class="video-grid" id="mainFeed"></div>
+  <div class="video-grid" id="mainFeed">
+    <div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Loading Videos...</div>
+  </div>
 
   <!-- PAGE 2: Details Modal -->
   <div class="overlay" id="detailsModal">
     <div class="modal-box">
       <span class="close-icon" onclick="hideModal('detailsModal')"><i class="fa-solid fa-xmark"></i></span>
-      <img src="" id="detImg" class="details-img">
+      <img src="" id="detImg" class="details-img" onerror="this.src='https://via.placeholder.com/400x200/121721/ffcc00?text=No+Thumbnail'">
       <div class="details-title" id="detTitle"></div>
       
       <div class="stats-row">
-        <div class="stat-btn"><i class="fa-solid fa-heart"></i> <span id="detLikes">7</span> LIKE</div>
-        <div class="stat-btn"><i class="fa-solid fa-download"></i> <span id="detDownloads">1653</span> DOWNLOAD</div>
-        <div class="stat-btn"><i class="fa-solid fa-comment"></i> <span>1</span> COMMENTS</div>
-        <div class="stat-btn"><i class="fa-solid fa-share-nodes"></i> <span>3</span> SHARE</div>
+        <div class="stat-btn"><i class="fa-solid fa-heart"></i> <span id="detLikes">0</span> LIKE</div>
+        <div class="stat-btn"><i class="fa-solid fa-eye"></i> <span id="detViews">0</span> VIEWS</div>
+        <div class="stat-btn"><i class="fa-solid fa-comment"></i> <span>0</span> COMMENTS</div>
+        <div class="stat-btn"><i class="fa-solid fa-share-nodes"></i> <span>0</span> SHARE</div>
       </div>
 
       <div class="action-btn-group">
-        <button class="btn-like"><i class="fa-solid fa-heart"></i> Like</button>
+        <button class="btn-like" onclick="likeActiveVideo()"><i class="fa-solid fa-heart"></i> Like</button>
         <button class="btn-download" onclick="handleDownloadClick()"><i class="fa-solid fa-circle-down"></i> Download</button>
       </div>
     </div>
@@ -141,14 +145,14 @@
         <b><i class="fa-solid fa-circle-info"></i> How to Download?</b><br>
         1. Select any quality or part below.<br>
         2. Wait for <b>10 seconds</b> on the opened link.<br>
-        3. Return to the app to automatically receive the file!
+        3. Return to the app to automatically receive the file in Bot!
       </div>
 
       <div id="partsList"></div>
     </div>
   </div>
 
-  <!-- PAGE 5: Ad Unlock Requirement Modal -->
+  <!-- PAGE 5: Ad Unlock Modal -->
   <div class="overlay" id="unlockModal">
     <div class="modal-box">
       <span class="close-icon" onclick="hideModal('unlockModal')"><i class="fa-solid fa-xmark"></i></span>
@@ -170,7 +174,7 @@
     </div>
   </div>
 
-  <!-- PAGE 6: Early Return Warning Notice Popup -->
+  <!-- PAGE 6: Alert Warning Modal -->
   <div class="overlay" id="noticeModal">
     <div class="alert-card">
       <div class="alert-msg" id="noticeMsg">⚠️ You must wait full 10 seconds on the link. 6s remaining.</div>
@@ -178,22 +182,19 @@
     </div>
   </div>
 
-  <!-- FINAL PAGE: Video View Modal -->
-  <div class="overlay" id="finalVideoModal">
+  <!-- SUCCESS POPUP / TELEGRAM BOT REDIRECT -->
+  <div class="overlay" id="successModal">
     <div class="modal-box">
-      <span class="close-icon" onclick="hideModal('finalVideoModal')"><i class="fa-solid fa-xmark"></i></span>
-      <div class="video-box">
-        <video id="videoPlayer" controls autoplay style="width: 100%;">
-          <source src="" type="video/mp4">
-        </video>
-      </div>
+      <span class="close-icon" onclick="hideModal('successModal')"><i class="fa-solid fa-xmark"></i></span>
+      <div class="unlock-icon" style="color: #00b894;"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="unlock-title">Video Sent to Bot!</div>
       <div class="sec-notice-msg">
         Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Nav -->
   <div class="bottom-nav">
     <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i>Home</a>
     <a href="#" class="nav-item"><i class="fa-solid fa-fire"></i>Trending</a>
@@ -204,9 +205,12 @@
   <!-- Firebase Integration Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Your Web App's Firebase Configuration
+    // Initialize Telegram WebApp SDK
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) { tg.expand(); }
+
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
       authDomain: "viral-zone-f39b4.firebaseapp.com",
@@ -224,10 +228,11 @@
     let globalVideos = [];
     let activeVideo = null;
     let selectedPartUrl = "";
+    let selectedPartIndex = 0;
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
-    // Realtime Database Listener
+    // Fetch Videos from Firebase
     const videoRef = ref(db, 'videos');
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
@@ -242,16 +247,22 @@
 
     function renderAppFeed(videos) {
       const feed = document.getElementById('mainFeed');
+      if (videos.length === 0) {
+        feed.innerHTML = `<div class="no-data"><i class="fa-solid fa-folder-open"></i> Kono video pawa jayni. Admin panel theke upload korun.</div>`;
+        return;
+      }
+
       feed.innerHTML = '';
       videos.forEach((vid, idx) => {
         const partsCount = vid.parts ? vid.parts.length : 1;
+        const views = vid.views || 0;
         feed.innerHTML += `
-          <div class="video-card" onclick="showDetails(${idx})">
+          <div class="video-card" onclick="showDetails('${vid.id}', ${idx})">
             <div class="thumb-wrapper">
               <span class="badge-top">🔥 TOP</span>
               <span class="badge-parts"><i class="fa-solid fa-list-ul"></i> ${partsCount} ${partsCount > 1 ? 'Parts' : 'Part'}</span>
-              <img src="${vid.thumbnail || 'https://picsum.photos/300/200'}">
-              <span class="views-count"><i class="fa-regular fa-eye"></i> 92.4K</span>
+              <img src="${vid.thumbnail || ''}" onerror="this.src='https://via.placeholder.com/300x150/121721/ffcc00?text=BD+VIRAL'">
+              <span class="views-count"><i class="fa-regular fa-eye"></i> ${views}</span>
             </div>
             <div class="card-info">
               <div class="card-avatar">BD</div>
@@ -262,12 +273,27 @@
       });
     }
 
-    window.showDetails = function(index) {
+    window.showDetails = function(vidId, index) {
       activeVideo = globalVideos[index];
-      adsCountWatched = 0; 
-      document.getElementById('detImg').src = activeVideo.thumbnail || 'https://picsum.photos/300/200';
+      adsCountWatched = 0;
+
+      // Increment View Count in Firebase
+      const currentViews = (activeVideo.views || 0) + 1;
+      update(ref(db, 'videos/' + vidId), { views: currentViews });
+
+      document.getElementById('detImg').src = activeVideo.thumbnail || '';
       document.getElementById('detTitle').innerText = activeVideo.title;
+      document.getElementById('detLikes').innerText = activeVideo.likes || 0;
+      document.getElementById('detViews').innerText = currentViews;
       document.getElementById('detailsModal').style.display = 'flex';
+    };
+
+    window.likeActiveVideo = function() {
+      if (!activeVideo) return;
+      const newLikes = (activeVideo.likes || 0) + 1;
+      activeVideo.likes = newLikes;
+      document.getElementById('detLikes').innerText = newLikes;
+      update(ref(db, 'videos/' + activeVideo.id), { likes: newLikes });
     };
 
     window.handleDownloadClick = function() {
@@ -278,7 +304,7 @@
       const parts = activeVideo.parts || [activeVideo.videoUrl];
       parts.forEach((partUrl, pIdx) => {
         partsContainer.innerHTML += `
-          <div class="part-item-btn" onclick="choosePart('${partUrl}')">
+          <div class="part-item-btn" onclick="choosePart('${partUrl}', ${pIdx})">
             <span><i class="fa-solid fa-download"></i> Video Part ${pIdx + 1} [HD]</span>
             <i class="fa-solid fa-lock"></i>
           </div>
@@ -287,8 +313,9 @@
       document.getElementById('partsModal').style.display = 'flex';
     };
 
-    window.choosePart = function(url) {
+    window.choosePart = function(url, index) {
       selectedPartUrl = url;
+      selectedPartIndex = index;
       hideModal('partsModal');
       document.getElementById('unlockModal').style.display = 'flex';
     };
@@ -299,7 +326,7 @@
       window.open(adUrl, '_blank');
     };
 
-    // User Return Checking Logic (10 Seconds Timer Validation)
+    // Return Check & Send Video to Telegram Bot
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -317,23 +344,32 @@
             document.getElementById('noticeMsg').innerText = `✅ Ads ${adsCountWatched} viewed! Please watch ${left} more ads to unlock.`;
             document.getElementById('noticeModal').style.display = 'flex';
           } else {
-            // Unlock Success
+            // Success Unlock -> Send data to Telegram Bot
             hideModal('unlockModal');
-            document.getElementById('videoPlayer').src = selectedPartUrl;
-            document.getElementById('finalVideoModal').style.display = 'flex';
+            sendVideoToTelegramBot();
           }
         }
         adWatchStartTime = 0; 
       }
     });
 
-    window.hideModal = function(id) {
-      document.getElementById(id).style.display = 'none';
-      if(id === 'finalVideoModal'){
-        document.getElementById('videoPlayer').pause();
+    function sendVideoToTelegramBot() {
+      const payload = {
+        action: "send_video",
+        title: activeVideo.title,
+        partIndex: selectedPartIndex + 1,
+        videoUrl: selectedPartUrl,
+        noticeMessage: "Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe."
+      };
+
+      // 1. If inside Telegram WebApp
+      if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(payload));
+      } else {
+        // Fallback for normal browser view
+        document.getElementById('successModal').style.display = 'flex';
       }
-    };
-  </script>
-</body>
-    </html>
-    
+    }
+
+    window.hideModal = function(id) {
+      document.getElementById(id).style
