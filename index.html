@@ -43,9 +43,8 @@
     .part-btn { background: #262626; border: 1px solid var(--primary-yellow); color: #fff; padding: 12px; width: 100%; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 13px; }
     .notice-box { background: #2b1f00; border: 1px solid var(--primary-yellow); padding: 15px; border-radius: 8px; text-align: center; font-size: 14px; }
     
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px 0; }
-    .nav-item { color: var(--text-muted); text-align: center; font-size: 11px; cursor: pointer; }
-    .nav-item.active { color: var(--primary-yellow); }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 1px solid #222; display: flex; justify-content: center; padding: 10px 0; }
+    .nav-item { color: var(--primary-yellow); text-align: center; font-size: 12px; font-weight: bold; }
     .nav-item i { font-size: 18px; display: block; margin-bottom: 2px; }
   </style>
 </head>
@@ -59,7 +58,7 @@
     <div id="page-home" class="view-page active">
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-        <input type="text" id="searchInput" onkeyup="filterVideos()" placeholder="Search Movies, Series, Videos...">
+        <input type="text" id="searchInput" onkeyup="filterVideos()" placeholder="Search Videos...">
       </div>
       <div class="section-title"><i class="fa-solid fa-fire"></i> Trending Now</div>
       <div class="video-grid" id="videoGrid">
@@ -78,10 +77,10 @@
   <div id="partModal" class="modal-overlay">
     <div class="modal-box">
       <span class="close-modal" onclick="closeModal('partModal')">&times;</span>
-      <h3 style="color:var(--primary-yellow); text-align:center; margin-bottom:15px;"><i class="fa-solid fa-cloud-arrow-down"></i> Select Quality / Part</h3>
+      <h3 style="color:var(--primary-yellow); text-align:center; margin-bottom:15px;"><i class="fa-solid fa-cloud-arrow-down"></i> Download Video</h3>
       <div class="instruction-box">
         <strong>How to Download?</strong><br>
-        1. Select any quality or part below.<br>
+        1. Click below to start.<br>
         2. Wait for <strong>10 seconds</strong> on the opened link.<br>
         3. Return to the app to automatically receive the file!
       </div>
@@ -117,11 +116,9 @@
     </div>
   </div>
 
+  <!-- Clean Bottom Nav (Faltu buttons removed) -->
   <div class="bottom-nav">
-    <div class="nav-item active"><i class="fa-solid fa-house"></i>Home</div>
-    <div class="nav-item"><i class="fa-solid fa-fire"></i>Trending</div>
-    <div class="nav-item"><i class="fa-solid fa-bookmark"></i>Saved</div>
-    <div class="nav-item"><i class="fa-solid fa-user"></i>Profile</div>
+    <div class="nav-item"><i class="fa-solid fa-house"></i>Home</div>
   </div>
 
   <script type="module">
@@ -143,7 +140,6 @@
 
     let videoList = [];
     let selectedVideo = null;
-    let selectedPartNum = 1;
     let adStartTime = null;
 
     async function fetchVideosFromFirebase() {
@@ -172,7 +168,7 @@
           <div class="video-card" onclick="openVideoDetails('${video.id}')">
             <div class="thumbnail-box">
               <img src="${video.img}" onerror="this.src='https://via.placeholder.com/300x200/222/ffcc00?text=Thumbnail'" alt="thumbnail">
-              <span class="badge-parts"><i class="fa-solid fa-list"></i> ${video.parts} Part${video.parts > 1 ? 's' : ''}</span>
+              <span class="badge-parts"><i class="fa-solid fa-play"></i> Ready</span>
             </div>
             <div class="video-info">
               <div class="video-title">${video.title}</div>
@@ -202,7 +198,7 @@
         <img class="details-img" src="${selectedVideo.img}" onerror="this.src='https://via.placeholder.com/300x200/222/ffcc00?text=Thumbnail'" alt="Detail">
         <h2 style="font-size: 16px; margin: 15px 0;">${selectedVideo.title}</h2>
         <button class="btn-action" onclick="handleDownloadClick()">
-          <i class="fa-solid fa-download"></i> Download
+          <i class="fa-solid fa-download"></i> Download Video
         </button>
       `;
       showPage('page-details');
@@ -210,20 +206,16 @@
 
     window.handleDownloadClick = function() {
       const partList = document.getElementById('partList');
-      partList.innerHTML = '';
-      for (let i = 1; i <= selectedVideo.parts; i++) {
-        partList.innerHTML += `
-          <div class="part-btn" onclick="openUnlockModal(${i})">
-            <span><i class="fa-solid fa-download"></i> Video Part ${i} [HD]</span>
-            <i class="fa-solid fa-lock" style="color:var(--primary-yellow)"></i>
-          </div>
-        `;
-      }
+      partList.innerHTML = `
+        <div class="part-btn" onclick="openUnlockModal()">
+          <span><i class="fa-solid fa-file-video"></i> ${selectedVideo.videoFileName || 'Video File [HD]'}</span>
+          <i class="fa-solid fa-lock" style="color:var(--primary-yellow)"></i>
+        </div>
+      `;
       openModal('partModal');
     }
 
-    window.openUnlockModal = function(partNum) {
-      selectedPartNum = partNum;
+    window.openUnlockModal = function() {
       closeModal('partModal');
       const dur = selectedVideo.adDuration || 10;
       document.getElementById('reqSecText').innerText = dur + " সেকেন্ডের";
@@ -250,7 +242,7 @@
         document.getElementById('noticeMessage').innerText = `⚠️ You must wait full ${requiredDuration} seconds on the link. ${remaining}s remaining.`;
         openModal('noticeModal');
       } else {
-        const successText = `Video Part ${selectedPartNum} sent to your Telegram Bot inbox!\n\nVideo ti kmn laglo and video ti valo lagle bondhuder majhe share korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
+        const successText = `Video file (${selectedVideo.videoFileName}) sent to your Telegram Bot inbox!\n\nVideo ti kmn laglo and video ti valo lagle bondhuder majhe share korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
         document.getElementById('successMsg').innerText = successText;
         openModal('successModal');
       }
