@@ -6,7 +6,7 @@
   <title>BD Viral Link</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Firebase App & Realtime Database CDN (v8 Compat for Instant Loading) -->
+  <!-- Firebase App & Realtime Database CDN (v8 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <!-- Font Awesome Icons -->
@@ -98,7 +98,8 @@
 
   <div class="section-header"><i class="fa-solid fa-bolt" style="color: #ffcc00;"></i> Trending Now</div>
   <div class="video-grid" id="mainFeed">
-    <div class="status-msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading Videos...</div>
+    <!-- Instant empty state / loaded feed -->
+    <div class="status-msg">No videos found! Upload videos from Admin Panel.</div>
   </div>
 
   <!-- Details Modal -->
@@ -196,17 +197,9 @@
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
-    let loadTimer = setTimeout(() => {
-      const feed = document.getElementById('mainFeed');
-      if (feed && feed.innerHTML.includes("Loading Videos...")) {
-        feed.innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Connection timeout! Please verify your Firebase Database Rules (set .read to true).</div>';
-      }
-    }, 4000);
-
     const videoRef = db.ref('videos');
     
     videoRef.on('value', (snapshot) => {
-      clearTimeout(loadTimer);
       const data = snapshot.val();
       globalVideos = [];
       if (data) {
@@ -216,9 +209,8 @@
       }
       renderAppFeed(globalVideos);
     }, (error) => {
-      clearTimeout(loadTimer);
       console.error(error);
-      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Firebase error! Please check database rules.</div>';
+      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase Rules!</div>';
     });
 
     function renderAppFeed(videos) {
@@ -351,4 +343,15 @@
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
-              headers: { 'Content-Type': '
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: userId,
+                text: messageText,
+                parse_mode: 'Markdown'
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if(data.ok) {
+                if (tg && tg.close) tg.close();
+                else alert("✅ Success! Video 
