@@ -7,6 +7,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         :root {
             --bg-color: #07040d;
@@ -113,8 +117,19 @@
     <script>
         const PIN = "1234";
         
-        const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$8kiSHCANxWYonMv7vhymkueXNd2sTQrD.OnnLIqrKkhB0i1.FtXOK";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
+            authDomain: "viral-zone-f39b4.firebaseapp.com",
+            databaseURL: "https://viral-zone-f39b4-default-rtdb.firebaseio.com",
+            projectId: "viral-zone-f39b4",
+            storageBucket: "viral-zone-f39b4.firebasestorage.app",
+            messagingSenderId: "722917065467",
+            appId: "1:722917065467:web:4e65fd62a81503ed96665e",
+            measurementId: "G-2B75VFV2BB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         let cloudData = {
             adLink: "https://telegram.org",
@@ -132,37 +147,30 @@
             }
         }
 
-        async function loadAdminData() {
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
-                });
-                const data = await res.json();
-                cloudData = data.record || cloudData;
-            } catch (e) { console.error(e); }
-
-            document.getElementById('ad-url-input').value = cloudData.adLink || "https://telegram.org";
-            document.getElementById('ad-timer-input').value = cloudData.adTimer || 10;
-            renderVideoList();
+        function loadAdminData() {
+            db.ref('/').once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    cloudData = data;
+                }
+                document.getElementById('ad-url-input').value = cloudData.adLink || "https://telegram.org";
+                document.getElementById('ad-timer-input').value = cloudData.adTimer || 10;
+                renderVideoList();
+            });
         }
 
-        async function updateCloud() {
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_API_KEY
-                    },
-                    body: JSON.stringify(cloudData)
-                });
-            } catch (e) { alert("Error saving to cloud!"); }
+        function updateCloud() {
+            db.ref('/').set(cloudData, (error) => {
+                if (error) {
+                    alert("Error saving to cloud!");
+                }
+            });
         }
 
-        async function saveSettings() {
+        function saveSettings() {
             cloudData.adLink = document.getElementById('ad-url-input').value;
             cloudData.adTimer = parseInt(document.getElementById('ad-timer-input').value);
-            await updateCloud();
+            updateCloud();
             alert("✅ Settings সফলভাবে সেভ হয়েছে!");
         }
 
@@ -180,7 +188,7 @@
             `).join('');
         }
 
-        async function addNewVideo() {
+        function addNewVideo() {
             const title = document.getElementById('v-title').value;
             const thumb = document.getElementById('v-thumb').value;
             const url = document.getElementById('v-url').value;
@@ -197,7 +205,7 @@
                 url: url
             });
 
-            await updateCloud();
+            updateCloud();
             alert("✅ ভিডিও সফলভাবে যোগ করা হয়েছে!");
             renderVideoList();
 
@@ -206,9 +214,9 @@
             document.getElementById('v-url').value = '';
         }
 
-        async function deleteVideo(id) {
+        function deleteVideo(id) {
             cloudData.videos = cloudData.videos.filter(v => v.id !== id);
-            await updateCloud();
+            updateCloud();
             renderVideoList();
         }
     </script>
