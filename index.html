@@ -6,6 +6,11 @@
     <title>BD VIRAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK (Compat Version for Direct Browser Scripting) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --bg-color: #07040d;
@@ -92,53 +97,43 @@
         const tg = window.Telegram && window.Telegram.WebApp;
         if (tg) tg.expand();
 
-        const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$8kiSHCANxWYonMv7vhymkueXNd2sTQrD.OnnLIqrKkhB0i1.FtXOK";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
+            authDomain: "viral-zone-f39b4.firebaseapp.com",
+            databaseURL: "https://viral-zone-f39b4-default-rtdb.firebaseio.com",
+            projectId: "viral-zone-f39b4",
+            storageBucket: "viral-zone-f39b4.firebasestorage.app",
+            messagingSenderId: "722917065467",
+            appId: "1:722917065467:web:4e65fd62a81503ed96665e",
+            measurementId: "G-2B75VFV2BB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
         let sampleVideos = [];
         let activeVideo = null;
 
-        async function fetchCloudData() {
+        function fetchCloudData() {
             const container = document.getElementById('video-list');
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
             
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_API_KEY
-                    }
-                });
-                
-                if (!res.ok) throw new Error("API Error");
-
-                const data = await res.json();
-                let record = data.record || data;
-                
-                adLink = record.adLink || adLink;
-                timerSeconds = record.adTimer || timerSeconds;
-                sampleVideos = record.videos || [];
-                renderVideos(sampleVideos);
-
-            } catch (e) {
-                console.error("Direct fetch failed, trying proxy...", e);
-                // Fallback using CORS Proxy
-                try {
-                    const proxyRes = await fetch(`https://api.codetabs.com/v1/proxy?quest=https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                        headers: { 'X-Master-Key': JSONBIN_API_KEY }
-                    });
-                    const proxyData = await proxyRes.json();
-                    let record = proxyData.record || proxyData;
-                    
-                    adLink = record.adLink || adLink;
-                    timerSeconds = record.adTimer || timerSeconds;
-                    sampleVideos = record.videos || [];
+            db.ref('/').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    adLink = data.adLink || adLink;
+                    timerSeconds = data.adTimer || timerSeconds;
+                    sampleVideos = data.videos || [];
                     renderVideos(sampleVideos);
-                } catch (err) {
-                    container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe. Ektu por abar try korun.</p>";
+                } else {
+                    container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>কোনো ভিডিও পাওয়া যায়নি!</p>";
                 }
-            }
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#f87171; font-size:12px; padding:20px;'>Video load korte somosya hochhe.</p>";
+            });
         }
 
         function renderVideos(list) {
