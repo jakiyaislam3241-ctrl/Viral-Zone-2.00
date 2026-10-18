@@ -19,7 +19,7 @@
     .form-group input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; outline: none; }
     .form-group input:focus { border-color: #ffcc00; }
     
-    .btn-submit { background: #ffcc00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn-submit { background: #ffcc00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .btn-submit:hover { background: #e6b800; }
 
     /* Uploaded List & Edit Section */
@@ -29,8 +29,8 @@
     .video-header { display: flex; align-items: center; gap: 10px; }
     .video-header img { width: 60px; height: 50px; object-fit: cover; border-radius: 5px; background: #222; }
     .video-info { flex: 1; }
-    .video-info h4 { font-size: 14px; color: #fff; margin-bottom: 4px; }
-    .video-info p { font-size: 11px; color: #aaa; }
+    .video-info h4 { font-size: 14px; color: #fff; margin-bottom: 4px; word-break: break-all; }
+    .video-info p { font-size: 11px; color: #aaa; word-break: break-all; }
 
     .edit-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
     .edit-inputs input { background: #000; border: 1px solid #444; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
@@ -61,7 +61,7 @@
         </div>
 
         <div class="form-group">
-          <label>3. VIDEO UPLOAD (File Select Box)</label>
+          <label>3. VIDEO UPLOAD (Select Video File)</label>
           <input type="file" id="adminVideoFile" accept="video/*" required style="padding: 7px; background: #111; cursor: pointer;">
         </div>
 
@@ -80,7 +80,7 @@
           <input type="url" id="adminAdLink" placeholder="https://www.adsterra.com/direct-link" required>
         </div>
 
-        <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Video</button>
+        <button type="submit" class="btn-submit" id="submitBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Video</button>
       </form>
     </div>
 
@@ -108,13 +108,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Upload New Video
+    // Fast 2-Second Upload Function
     window.uploadToFirebase = async function(event) {
       event.preventDefault();
-      const submitBtn = event.target.querySelector('button');
+      const submitBtn = document.getElementById('submitBtn');
       const fileInput = document.getElementById('adminVideoFile');
       
-      if(fileInput.files.length === 0) {
+      if(!fileInput.files || fileInput.files.length === 0) {
         alert("Please select a video file!");
         return;
       }
@@ -123,34 +123,34 @@
       submitBtn.disabled = true;
 
       try {
-        const videoFileName = fileInput.files[0].name;
+        // Getting pure text name of file to prevent object serialization hang
+        const fileName = fileInput.files[0].name;
 
         await addDoc(collection(db, "videos"), {
-          title: document.getElementById('adminTitle').value,
-          img: document.getElementById('adminImg').value,
-          videoFileName: videoFileName,
-          adLimit: parseInt(document.getElementById('adminAdLimit').value),
-          adDuration: parseInt(document.getElementById('adminAdDuration').value),
-          adLink: document.getElementById('adminAdLink').value,
+          title: document.getElementById('adminTitle').value.trim(),
+          img: document.getElementById('adminImg').value.trim(),
+          videoFileName: fileName,
+          adLimit: Number(document.getElementById('adminAdLimit').value) || 1,
+          adDuration: Number(document.getElementById('adminAdDuration').value) || 10,
+          adLink: document.getElementById('adminAdLink').value.trim(),
           createdAt: Date.now()
         });
 
-        alert("Video uploaded successfully!");
+        alert("Video uploaded successfully in 2 seconds!");
         document.getElementById('adminForm').reset();
         loadUploadedVideos();
       } catch (error) {
         console.error("Error uploading: ", error);
-        alert("Upload failed!");
+        alert("Upload failed! Error: " + error.message);
       } finally {
         submitBtn.innerText = "Upload Video";
         submitBtn.disabled = false;
       }
     }
 
-    // Fetch & Display Uploaded Videos for Edit/Delete
+    // Fetch & Display Uploaded Videos
     async function loadUploadedVideos() {
       const container = document.getElementById('uploadedList');
-      container.innerHTML = '<div style="text-align:center; color:#888;">Loading...</div>';
 
       try {
         const querySnapshot = await getDocs(collection(db, "videos"));
@@ -170,8 +170,8 @@
               <div class="video-header">
                 <img src="${data.img}" onerror="this.src='https://via.placeholder.com/60x50/222/ffcc00?text=Thumb'" alt="thumb">
                 <div class="video-info">
-                  <h4>File: ${data.videoFileName || 'N/A'}</h4>
-                  <p>Ad Link: ${data.adLink}</p>
+                  <h4>${data.title || 'Untitled'}</h4>
+                  <p>File: ${data.videoFileName || 'N/A'}</p>
                 </div>
               </div>
 
@@ -201,15 +201,15 @@
         });
       } catch (error) {
         console.error("Load error:", error);
-        container.innerHTML = '<div style="text-align:center; color:#ff5555;">Error loading list.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#ff5555;">Error loading list. Check console.</div>';
       }
     }
 
     // Save Edit Function
     window.updateVideo = async function(docId) {
       const newTitle = document.getElementById(`title-${docId}`).value;
-      const newLimit = parseInt(document.getElementById(`limit-${docId}`).value);
-      const newDuration = parseInt(document.getElementById(`duration-${docId}`).value);
+      const newLimit = Number(document.getElementById(`limit-${docId}`).value);
+      const newDuration = Number(document.getElementById(`duration-${docId}`).value);
 
       try {
         const videoRef = doc(db, "videos", docId);
