@@ -43,7 +43,6 @@
 
     .status-msg { text-align: center; color: #a0aec0; padding: 40px 15px; font-size: 14px; grid-column: span 2; }
 
-    /* Modals Base */
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
     .modal-box { background: #121721; border: 1px solid #ffcc00; width: 100%; max-width: 420px; border-radius: 12px; padding: 15px; position: relative; max-height: 90vh; overflow-y: auto; }
     .close-icon { position: absolute; top: 12px; right: 15px; color: #a0aec0; font-size: 20px; cursor: pointer; background: #1a2230; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -71,7 +70,6 @@
     .alert-notice { background: rgba(229, 9, 20, 0.15); border: 1px solid #e50914; color: #ff7675; padding: 8px 12px; border-radius: 6px; font-size: 11px; margin-top: 10px; text-align: center; }
     .btn-watch-ad { background: #ffcc00; color: #000; font-weight: bold; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
 
-    /* Screenshot Exact Alert Notice Dialog Modal */
     .alert-card { background: #ffffff; color: #000000; border-radius: 16px; padding: 25px 20px 15px; text-align: left; max-width: 320px; margin: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
     .alert-msg { font-size: 14px; font-weight: 500; color: #2d3748; margin-bottom: 25px; line-height: 1.5; }
     .btn-alert-close { background: transparent; color: #2b6cb0; border: none; font-weight: bold; font-size: 14px; cursor: pointer; float: right; padding: 5px; }
@@ -210,7 +208,7 @@
       renderAppFeed(globalVideos);
     }, (error) => {
       console.error(error);
-      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check Firebase Rules!</div>';
+      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase Rules!</div>';
     });
 
     function renderAppFeed(videos) {
@@ -354,4 +352,6 @@
             .then(data => {
               if(data.ok) {
                 if (tg && tg.close) tg.close();
-                else alert("✅ Success! Video sent to your Teleg
+                else alert("✅ Success! Video sent to your Telegram Bot inbox.");
+              } else {
+                alert("⚠️ Vid
