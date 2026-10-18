@@ -93,7 +93,7 @@
         if (tg) tg.expand();
 
         const JSONBIN_BIN_ID = "6ad39e88ac6210605a3a3028";
-        const JSONBIN_API_KEY = "$2a$10$5v/GnGFSX1AKNFKDU6JC6.4MqbTxKmdzMEvKb9S9T7CsnQZ0v4xxe";
+        const JSONBIN_API_KEY = "$2a$10$8kiSHCANxWYonMv7vhymkueXNd2sTQrD.OnnLIqrKkhB0i1.FtXOK";
 
         let adLink = "https://telegram.org";
         let timerSeconds = 10;
@@ -105,25 +105,17 @@
             container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Loading videos...</p>";
             
             try {
-                // Primary Request
-                let res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'GET',
+                    headers: {
                         'X-Master-Key': JSONBIN_API_KEY,
                         'X-Bin-Meta': 'false'
                     }
                 });
 
-                let data;
-                if (res.ok) {
-                    data = await res.json();
-                } else {
-                    // CORS Proxy Backup Request
-                    const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`);
-                    let proxyRes = await fetch(proxyUrl, {
-                        headers: { 'X-Master-Key': JSONBIN_API_KEY }
-                    });
-                    data = await proxyRes.json();
-                }
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+                const data = await res.json();
                 
                 if (data) {
                     let record = data.record || data;
@@ -141,7 +133,7 @@
         function renderVideos(list) {
             const container = document.getElementById('video-list');
             if (!list || list.length === 0) {
-                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>Kono video pawa jayni!</p>";
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:#aaa; font-size:12px; padding:20px;'>কোনো ভিডিও পাওয়া যায়নি!</p>";
                 return;
             }
             container.innerHTML = list.map(v => `
