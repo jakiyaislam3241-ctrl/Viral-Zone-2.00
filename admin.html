@@ -1,224 +1,123 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - BD Viral Link</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b0e14; color: #ffffff; padding: 20px; }
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    .admin-card { background: #121721; border: 1px solid #ffcc00; max-width: 550px; margin: 0 auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .admin-card h2 { color: #ffcc00; font-size: 20px; text-align: center; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
     
-    <style>
-        :root {
-            --bg-color: #07040d;
-            --card-bg: rgba(23, 14, 38, 0.85);
-            --border-purple: rgba(168, 85, 247, 0.3);
-            --primary-purple: #a855f7;
-            --purple-glow: #9333ea;
-            --text-main: #f3e8ff;
-            --text-dim: #a78bfa;
-            --danger-red: #ef4444;
-        }
+    .form-group { margin-bottom: 15px; }
+    label { font-size: 13px; color: #ffcc00; font-weight: bold; display: block; margin-bottom: 6px; }
+    input, textarea { width: 100%; background: #1a2230; border: 1px solid #2d3748; color: #fff; padding: 12px; border-radius: 6px; font-size: 14px; }
+    input:focus, textarea:focus { border-color: #ffcc00; outline: none; }
+    
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at top, #1c0836 0%, var(--bg-color) 80%);
-            color: var(--text-main); min-height: 100vh; padding: 20px;
-        }
-
-        .auth-card, .admin-card {
-            background: var(--card-bg); border: 1px solid var(--border-purple);
-            border-radius: 20px; padding: 22px; max-width: 420px;
-            margin: 0 auto 20px; box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
-        }
-
-        h2 { font-size: 18px; margin-bottom: 15px; color: var(--primary-purple); display: flex; align-items: center; gap: 8px; }
-        .form-group { margin-bottom: 14px; }
-        label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
-
-        input {
-            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-purple); border-radius: 10px;
-            color: white; font-size: 14px; outline: none;
-        }
-
-        .btn {
-            width: 100%; padding: 12px;
-            background: linear-gradient(135deg, var(--primary-purple), var(--purple-glow));
-            border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;
-        }
-
-        .btn-danger {
-            background: var(--danger-red); padding: 6px 10px;
-            border-radius: 6px; font-size: 11px; border: none; color: white; cursor: pointer;
-        }
-
-        .video-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; margin-bottom: 8px;
-        }
-
-        #admin-panel-content { display: none; }
-    </style>
+    .btn-upload { background: #ffcc00; color: #000; font-weight: bold; border: none; padding: 14px; width: 100%; border-radius: 6px; font-size: 16px; margin-top: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-upload:hover { background: #e6b800; }
+  </style>
 </head>
 <body>
 
-    <div class="auth-card" id="auth-screen">
-        <h2><i class="fa-solid fa-lock"></i> Admin Verification</h2>
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-user-shield"></i> Admin Control Panel</h2>
+    
+    <form id="adminForm">
+      <div class="form-group">
+        <label><i class="fa-solid fa-heading"></i> Video Title</label>
+        <input type="text" id="vTitle" placeholder="Enter video title..." required>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-image"></i> Thumbnail Image Link</label>
+        <input type="url" id="vThumb" placeholder="https://image-link.com/photo.jpg" required>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-video"></i> Video Link(s) (For multiple parts use comma ,)</label>
+        <textarea id="vLinks" rows="3" placeholder="https://video1.mp4, https://video2.mp4" required></textarea>
+      </div>
+
+      <div class="row-2">
         <div class="form-group">
-            <label>এডমিন পিন কোড লিখুন:</label>
-            <input type="password" id="passcode" placeholder="Default PIN: 1234">
-        </div>
-        <button class="btn" onclick="verifyPin()">Login to Admin Panel</button>
-    </div>
-
-    <div id="admin-panel-content">
-        <div class="admin-card">
-            <h2><i class="fa-solid fa-gears"></i> Monetization Settings</h2>
-            <div class="form-group">
-                <label>Direct Ad Link:</label>
-                <input type="text" id="ad-url-input">
-            </div>
-            <div class="form-group">
-                <label>Ad Timer Duration (Seconds):</label>
-                <input type="number" id="ad-timer-input">
-            </div>
-            <button class="btn" onclick="saveSettings()">Save Settings</button>
+          <label><i class="fa-solid fa-layer-group"></i> Ads Limit</label>
+          <input type="number" id="vAdLimit" value="1" min="1" required>
         </div>
 
-        <div class="admin-card">
-            <h2><i class="fa-solid fa-square-plus"></i> Add New Video</h2>
-            <div class="form-group">
-                <label>Video Title:</label>
-                <input type="text" id="v-title" placeholder="ভিডিওর শিরোনাম">
-            </div>
-            <div class="form-group">
-                <label>Thumbnail Image URL:</label>
-                <input type="text" id="v-thumb" placeholder="https://example.com/image.jpg">
-            </div>
-            <div class="form-group">
-                <label>Video File URL (.mp4):</label>
-                <input type="text" id="v-url" placeholder="https://example.com/video.mp4">
-            </div>
-            <button class="btn" onclick="addNewVideo()">Add Video</button>
+        <div class="form-group">
+          <label><i class="fa-solid fa-clock"></i> Ads Duration (Seconds)</label>
+          <input type="number" id="vAdDuration" value="10" min="1" required>
         </div>
+      </div>
 
-        <div class="admin-card">
-            <h2><i class="fa-solid fa-list"></i> Manage Videos</h2>
-            <div id="video-manage-list"></div>
-        </div>
-    </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-link"></i> Adsterra Direct Link (Ads Link)</label>
+        <input type="url" id="vAdLink" placeholder="https://www.adsterra-direct-link.com/..." required>
+      </div>
 
-    <script>
-        const PIN = "1234";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
-            authDomain: "viral-zone-f39b4.firebaseapp.com",
-            databaseURL: "https://viral-zone-f39b4-default-rtdb.firebaseio.com",
-            projectId: "viral-zone-f39b4",
-            storageBucket: "viral-zone-f39b4.firebasestorage.app",
-            messagingSenderId: "722917065467",
-            appId: "1:722917065467:web:4e65fd62a81503ed96665e",
-            measurementId: "G-2B75VFV2BB"
-        };
+      <button type="submit" class="btn-upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload to User Panel</button>
+    </form>
+  </div>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  <!-- Firebase Admin Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        let cloudData = {
-            adLink: "https://www.profitableratecpmnetwork.com/qrdy0m5rud?key=93071f024795fc9ac4a0568d74c9d457",
-            adTimer: 10,
-            videos: []
-        };
+    // Your Web App's Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
+      authDomain: "viral-zone-f39b4.firebaseapp.com",
+      databaseURL: "https://viral-zone-f39b4-default-rtdb.firebaseio.com",
+      projectId: "viral-zone-f39b4",
+      storageBucket: "viral-zone-f39b4.firebasestorage.app",
+      messagingSenderId: "722917065467",
+      appId: "1:722917065467:web:ea8904b7185f80f996665e",
+      measurementId: "G-GSXHHDSPL0"
+    };
 
-        function verifyPin() {
-            if (document.getElementById('passcode').value === PIN) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('admin-panel-content').style.display = 'block';
-                loadAdminData();
-            } else {
-                alert("ভুল পাসওয়ার্ড!");
-            }
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        function loadAdminData() {
-            db.ref('/').once('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    cloudData = data;
-                }
-                document.getElementById('ad-url-input').value = cloudData.adLink || "https://www.profitableratecpmnetwork.com/qrdy0m5rud?key=93071f024795fc9ac4a0568d74c9d457";
-                document.getElementById('ad-timer-input').value = cloudData.adTimer || 10;
-                renderVideoList();
-            });
-        }
+    document.getElementById('adminForm').addEventListener('submit', function(e) {
+      e.preventDefault();
 
-        function updateCloud() {
-            db.ref('/').set(cloudData, (error) => {
-                if (error) {
-                    alert("Error saving to cloud!");
-                }
-            });
-        }
+      const title = document.getElementById('vTitle').value;
+      const thumbnail = document.getElementById('vThumb').value;
+      const rawLinks = document.getElementById('vLinks').value;
+      const adLimit = document.getElementById('vAdLimit').value;
+      const adDuration = document.getElementById('vAdDuration').value;
+      const adLink = document.getElementById('vAdLink').value;
 
-        function saveSettings() {
-            cloudData.adLink = document.getElementById('ad-url-input').value;
-            cloudData.adTimer = parseInt(document.getElementById('ad-timer-input').value);
-            updateCloud();
-            alert("✅ Settings সফলভাবে সেভ হয়েছে!");
-        }
+      // Parse video parts array
+      const partsArr = rawLinks.split(',').map(url => url.trim());
 
-        function renderVideoList() {
-            const listWrap = document.getElementById('video-manage-list');
-            if (!cloudData.videos || cloudData.videos.length === 0) {
-                listWrap.innerHTML = "<p style='font-size:12px; color:#aaa;'>কোনো ভিডিও যুক্ত করা নেই।</p>";
-                return;
-            }
-            listWrap.innerHTML = cloudData.videos.map(v => `
-                <div class="video-item">
-                    <span style="font-size:12px; font-weight:bold; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${v.title}</span>
-                    <button class="btn-danger" onclick="deleteVideo(${v.id})">Delete</button>
-                </div>
-            `).join('');
-        }
+      const payload = {
+        title: title,
+        thumbnail: thumbnail,
+        parts: partsArr,
+        adLimit: parseInt(adLimit),
+        adDuration: parseInt(adDuration),
+        adLink: adLink,
+        createdAt: Date.now()
+      };
 
-        function addNewVideo() {
-            const title = document.getElementById('v-title').value;
-            const thumb = document.getElementById('v-thumb').value;
-            const url = document.getElementById('v-url').value;
-
-            if (!title || !url) { alert("শিরোনাম এবং ভিডিও লিঙ্ক প্রয়োজন!"); return; }
-
-            if (!cloudData.videos) cloudData.videos = [];
-
-            cloudData.videos.push({
-                id: Date.now(),
-                title: title,
-                views: "1.2K",
-                thumb: thumb || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500",
-                url: url
-            });
-
-            updateCloud();
-            alert("✅ ভিডিও সফলভাবে যোগ করা হয়েছে!");
-            renderVideoList();
-
-            document.getElementById('v-title').value = '';
-            document.getElementById('v-thumb').value = '';
-            document.getElementById('v-url').value = '';
-        }
-
-        function deleteVideo(id) {
-            cloudData.videos = cloudData.videos.filter(v => v.id !== id);
-            updateCloud();
-            renderVideoList();
-        }
-    </script>
+      // Push to Firebase Realtime Database
+      push(ref(db, 'videos'), payload)
+        .then(() => {
+          alert('✅ Video successfully uploaded to User Panel!');
+          document.getElementById('adminForm').reset();
+        })
+        .catch((err) => {
+          alert('❌ Upload failed: ' + err.message);
+        });
+    });
+  </script>
 </body>
 </html>
