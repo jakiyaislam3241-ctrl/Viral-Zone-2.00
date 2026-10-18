@@ -6,7 +6,7 @@
   <title>BD Viral Link</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Firebase App & Realtime Database CDN (Compat version for instant loading) -->
+  <!-- Firebase App & Realtime Database CDN (v8 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <!-- Font Awesome Icons -->
@@ -175,7 +175,6 @@
 
     const BOT_TOKEN = "8908636574:AAE23EW6gLUpBO7tRDnjzTb6OYUdWQkfneQ";
 
-    // Firebase Config (Compat SDK)
     const firebaseConfig = {
       apiKey: "AIzaSyAaN2JFDn7SbEGaUWFjxVF6Dk32TaB4h3k",
       authDomain: "viral-zone-f39b4.firebaseapp.com",
@@ -197,10 +196,19 @@
     let adWatchStartTime = 0;
     let adsCountWatched = 0;
 
-    // Load Videos from Firebase Realtime Database
+    // Safety Timeout Handler (Prevents endless loading loop)
+    let loadTimer = setTimeout(() => {
+      const feed = document.getElementById('mainFeed');
+      if (feed && feed.innerHTML.includes("Loading Videos...")) {
+        feed.innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Connection timeout! Please verify your Firebase Database Rules (set .read to true).</div>';
+      }
+    }, 4000);
+
+    // Fetch Database Data via Direct REST / Realtime Listener
     const videoRef = db.ref('videos');
     
     videoRef.on('value', (snapshot) => {
+      clearTimeout(loadTimer);
       const data = snapshot.val();
       globalVideos = [];
       if (data) {
@@ -210,14 +218,15 @@
       }
       renderAppFeed(globalVideos);
     }, (error) => {
+      clearTimeout(loadTimer);
       console.error(error);
-      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Database connection failed. Please check your Firebase Rules!</div>';
+      document.getElementById('mainFeed').innerHTML = '<div class="status-msg" style="color:#ff4757;">⚠️ Firebase error! Please check database rules.</div>';
     });
 
     function renderAppFeed(videos) {
       const feed = document.getElementById('mainFeed');
       if (videos.length === 0) {
-        feed.innerHTML = '<div class="status-msg">No videos found! Upload videos from Admin Panel.</div>';
+        feed.innerHTML = '<div class="status-msg">No videos found! Upload videos from Admin Panel first.</div>';
         return;
       }
       feed.innerHTML = '';
@@ -320,7 +329,6 @@
       window.open(adUrl, '_blank');
     };
 
-    // Strict Timer & Telegram Bot Integration Check
     window.addEventListener("focus", function() {
       if (adWatchStartTime > 0) {
         let timeSpent = Math.floor((Date.now() - adWatchStartTime) / 1000);
@@ -343,14 +351,4 @@
             const userId = tg?.initDataUnsafe?.user?.id || "6489017273";
             const messageText = `🎬 *${activeVideo.title}* [Part ${selectedPartIndex + 1}]\n\n🔗 Video Link: ${selectedPartUrl}\n\n💬 Video ti kmn laglo and video ti valo lagle bondhuder majhe sharre korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
 
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: userId,
-                text: messageText,
-                parse_mode: 'Markdown'
-              })
-            })
-            .then(res => res.json())
-            .then(data =
+            fetch(`https://api.telegram.org
