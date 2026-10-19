@@ -1,258 +1,364 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BD Viral Link - User App</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0d0d0d; color: #ffffff; padding-bottom: 70px; }
-    :root { --primary-yellow: #ffcc00; --bg-dark: #121212; --card-bg: #1e1e1e; --text-muted: #aaa; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Incam</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    header { background-color: var(--bg-dark); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-yellow); position: sticky; top: 0; z-index: 100; }
-    .brand { font-size: 20px; font-weight: bold; color: var(--primary-yellow); }
-    .brand span { background-color: var(--primary-yellow); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 4px; }
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     
-    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .search-box { background: #252525; padding: 10px 15px; border-radius: 25px; display: flex; align-items: center; margin-bottom: 15px; border: 1px solid #333; }
-    .search-box input { background: transparent; border: none; color: #fff; margin-left: 10px; outline: none; width: 100%; }
+    <!-- Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    .section-title { font-size: 16px; color: var(--primary-yellow); margin: 15px 0 10px 0; display: flex; align-items: center; gap: 8px; }
-    
-    .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .video-card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #2a2a2a; cursor: pointer; }
-    .thumbnail-box { position: relative; height: 120px; background: #252525; display: flex; align-items: center; justify-content: center; }
-    .thumbnail-box img { width: 100%; height: 100%; object-fit: cover; }
-    .badge-parts { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.85); color: var(--primary-yellow); border: 1px solid var(--primary-yellow); font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-    .video-info { padding: 8px; }
-    .video-title { font-size: 12px; font-weight: 600; height: 32px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    
-    .view-page { display: none; }
-    .view-page.active { display: block; }
-    
-    .details-img { width: 100%; height: 220px; object-fit: cover; border-radius: 8px; background: #222; }
-    .btn-action { background: var(--primary-yellow); color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--primary-yellow); border-radius: 12px; width: 100%; max-width: 400px; padding: 20px; position: relative; }
-    .close-modal { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 20px; cursor: pointer; }
-    
-    .instruction-box { background: #282815; border-left: 3px solid var(--primary-yellow); padding: 10px; font-size: 12px; margin-bottom: 15px; border-radius: 4px; }
-    .part-btn { background: #262626; border: 1px solid var(--primary-yellow); color: #fff; padding: 12px; width: 100%; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 13px; }
-    .notice-box { background: #2b1f00; border: 1px solid var(--primary-yellow); padding: 15px; border-radius: 8px; text-align: center; font-size: 14px; }
-    
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 1px solid #222; display: flex; justify-content: center; padding: 10px 0; }
-    .nav-item { color: var(--primary-yellow); text-align: center; font-size: 12px; font-weight: bold; }
-    .nav-item i { font-size: 18px; display: block; margin-bottom: 2px; }
-  </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
+        .bg-gradient-main { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); }
+        .loader { width: 24px; height: 24px; border: 3px solid #e5e7eb; border-bottom-color: #7c3aed; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .nav-item.active i, .nav-item.active span { color: #7c3aed; }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800">
 
-  <header>
-    <div class="brand">BD VIRAL <span>LINK</span></div>
-  </header>
-
-  <div class="container">
-    <div id="page-home" class="view-page active">
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-        <input type="text" id="searchInput" onkeyup="filterVideos()" placeholder="Search Videos...">
-      </div>
-      <div class="section-title"><i class="fa-solid fa-fire"></i> Trending Now</div>
-      <div class="video-grid" id="videoGrid">
-        <div style="grid-column: 1/-1; text-align:center; color:#aaa; padding:20px;">Loading from Firebase...</div>
-      </div>
-    </div>
-
-    <div id="page-details" class="view-page">
-      <button onclick="showPage('page-home')" style="background:none; border:none; color:#fff; cursor:pointer; margin-bottom:10px;">
-        <i class="fa-solid fa-arrow-left"></i> Back
-      </button>
-      <div id="detailsContent"></div>
-    </div>
-  </div>
-
-  <div id="partModal" class="modal-overlay">
-    <div class="modal-box">
-      <span class="close-modal" onclick="closeModal('partModal')">&times;</span>
-      <h3 style="color:var(--primary-yellow); text-align:center; margin-bottom:15px;"><i class="fa-solid fa-cloud-arrow-down"></i> Download Video</h3>
-      <div class="instruction-box">
-        <strong>How to Download?</strong><br>
-        1. Click below to start.<br>
-        2. Wait for <strong>10 seconds</strong> on the opened link.<br>
-        3. Return to the app to automatically receive the file!
-      </div>
-      <div id="partList"></div>
-    </div>
-  </div>
-
-  <div id="unlockModal" class="modal-overlay">
-    <div class="modal-box" style="text-align: center;">
-      <span class="close-modal" onclick="closeModal('unlockModal')">&times;</span>
-      <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--primary-yellow); margin-bottom: 10px;"></i>
-      <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">Unlock Your Video</div>
-      <div class="instruction-box" style="text-align: left; margin-top: 10px;">
-        <p>⏱️ <strong id="reqSecText">10 সেকেন্ডের</strong> একটি বিজ্ঞাপন দেখতে হবে।</p>
-      </div>
-      <button class="btn-action" onclick="startAdProcess()">🎬 বিজ্ঞাপন দেখুন & ভিডিও আনলক করুন</button>
-    </div>
-  </div>
-
-  <div id="noticeModal" class="modal-overlay">
-    <div class="modal-box">
-      <div class="notice-box" id="noticeMessage">⚠️ You must wait full 10 seconds on the link.</div>
-      <button class="btn-action" style="margin-top: 15px;" onclick="closeModal('noticeModal')">Close</button>
-    </div>
-  </div>
-
-  <div id="successModal" class="modal-overlay">
-    <div class="modal-box" style="text-align: center;">
-      <i class="fa-solid fa-circle-check" style="font-size: 45px; color: #00ff66; margin-bottom: 10px;"></i>
-      <h3 style="margin-bottom: 10px;">Video Sent to Telegram Bot!</h3>
-      <p id="successMsg" style="font-size: 12px; color: #ddd; background: #222; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 15px; text-align: left;"></p>
-      <button class="btn-action" onclick="closeModal('successModal')">OK</button>
-    </div>
-  </div>
-
-  <!-- Clean Bottom Nav (Faltu buttons removed) -->
-  <div class="bottom-nav">
-    <div class="nav-item"><i class="fa-solid fa-house"></i>Home</div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
-      authDomain: "first-app-c33be.firebaseapp.com",
-      projectId: "first-app-c33be",
-      storageBucket: "first-app-c33be.firebasestorage.app",
-      messagingSenderId: "179840421702",
-      appId: "1:179840421702:web:2540c2b4ee48baec849f47",
-      measurementId: "G-VCMH0W3MJP"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let videoList = [];
-    let selectedVideo = null;
-    let adStartTime = null;
-
-    async function fetchVideosFromFirebase() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "videos"));
-        videoList = [];
-        querySnapshot.forEach((doc) => {
-          videoList.push({ id: doc.id, ...doc.data() });
-        });
-        renderVideos(videoList);
-      } catch (error) {
-        console.error("Error fetching firebase data: ", error);
-        document.getElementById('videoGrid').innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#ff6b6b;">Failed to load from Firebase.</div>';
-      }
-    }
-
-    window.renderVideos = function(dataToRender) {
-      const grid = document.getElementById('videoGrid');
-      grid.innerHTML = '';
-      if (!dataToRender || dataToRender.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:#aaa; padding:20px;">No Videos Available</div>';
-        return;
-      }
-      dataToRender.forEach(video => {
-        grid.innerHTML += `
-          <div class="video-card" onclick="openVideoDetails('${video.id}')">
-            <div class="thumbnail-box">
-              <img src="${video.img}" onerror="this.src='https://via.placeholder.com/300x200/222/ffcc00?text=Thumbnail'" alt="thumbnail">
-              <span class="badge-parts"><i class="fa-solid fa-play"></i> Ready</span>
+    <!-- Header -->
+    <div class="fixed top-0 w-full z-40 bg-white/90 backdrop-blur-md shadow-sm px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-main flex items-center justify-center text-white shadow-lg"><i class="fas fa-wallet"></i></div>
+            <div>
+                <p class="text-[10px] text-gray-500 font-semibold uppercase">My Balance</p>
+                <p class="text-lg font-bold leading-none text-gray-800">৳<span id="header-balance">0.00</span></p>
             </div>
-            <div class="video-info">
-              <div class="video-title">${video.title}</div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    window.filterVideos = function() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = videoList.filter(v => v.title.toLowerCase().includes(query));
-      renderVideos(filtered);
-    }
-
-    window.showPage = function(pageId) {
-      document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-    }
-
-    window.openVideoDetails = function(id) {
-      selectedVideo = videoList.find(v => v.id === id);
-      if (!selectedVideo) return;
-
-      const container = document.getElementById('detailsContent');
-      container.innerHTML = `
-        <img class="details-img" src="${selectedVideo.img}" onerror="this.src='https://via.placeholder.com/300x200/222/ffcc00?text=Thumbnail'" alt="Detail">
-        <h2 style="font-size: 16px; margin: 15px 0;">${selectedVideo.title}</h2>
-        <button class="btn-action" onclick="handleDownloadClick()">
-          <i class="fa-solid fa-download"></i> Download Video
-        </button>
-      `;
-      showPage('page-details');
-    }
-
-    window.handleDownloadClick = function() {
-      const partList = document.getElementById('partList');
-      partList.innerHTML = `
-        <div class="part-btn" onclick="openUnlockModal()">
-          <span><i class="fa-solid fa-file-video"></i> ${selectedVideo.videoFileName || 'Video File [HD]'}</span>
-          <i class="fa-solid fa-lock" style="color:var(--primary-yellow)"></i>
         </div>
-      `;
-      openModal('partModal');
-    }
+        <div id="profile-header" class="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold">Loading...</div>
+    </div>
 
-    window.openUnlockModal = function() {
-      closeModal('partModal');
-      const dur = selectedVideo.adDuration || 10;
-      document.getElementById('reqSecText').innerText = dur + " সেকেন্ডের";
-      openModal('unlockModal');
-    }
+    <!-- Main Content -->
+    <div id="app" class="container mx-auto px-4 mt-20 max-w-md">
 
-    window.startAdProcess = function() {
-      adStartTime = new Date().getTime();
-      window.open(selectedVideo.adLink, '_blank');
-      closeModal('unlockModal');
+        <!-- 1. HOME VIEW -->
+        <div id="view-home" class="view-section">
+            <div class="mb-4">
+                <h1 class="text-2xl font-bold mb-1">Bachelor <span class="text-purple-600">Files</span></h1>
+                <input type="text" id="searchInput" placeholder="Search files..." class="w-full bg-white px-4 py-3 rounded-xl shadow-sm border border-gray-100 mt-2 outline-none focus:border-purple-500">
+            </div>
 
-      window.removeEventListener('focus', checkAdCompletion);
-      window.addEventListener('focus', checkAdCompletion, { once: true });
-    }
+            <!-- Banner Ad -->
+            <div id="home-banner-container" class="mb-4 hidden rounded-xl overflow-hidden shadow-sm" onclick="clickBanner()">
+                <img id="home-banner-img" src="" class="w-full h-auto object-cover">
+            </div>
 
-    function checkAdCompletion() {
-      if (!adStartTime) return;
-      const currentTime = new Date().getTime();
-      const elapsedSeconds = Math.floor((currentTime - adStartTime) / 1000);
-      const requiredDuration = selectedVideo.adDuration || 10;
+            <!-- Slider -->
+            <div id="slider-container" class="w-full h-40 rounded-2xl overflow-hidden shadow-lg mb-6 flex overflow-x-auto snap-x no-scrollbar bg-gray-200">
+                <!-- Sliders dynamic -->
+            </div>
 
-      if (elapsedSeconds < requiredDuration) {
-        const remaining = requiredDuration - elapsedSeconds;
-        document.getElementById('noticeMessage').innerText = `⚠️ You must wait full ${requiredDuration} seconds on the link. ${remaining}s remaining.`;
-        openModal('noticeModal');
-      } else {
-        const successText = `Video file (${selectedVideo.videoFileName}) sent to your Telegram Bot inbox!\n\nVideo ti kmn laglo and video ti valo lagle bondhuder majhe share korun and securityr jonno 120 minute por automatic video ti inbox theke remove hoye jabe.`;
-        document.getElementById('successMsg').innerText = successText;
-        openModal('successModal');
-      }
-      adStartTime = null;
-    }
+            <!-- Files Grid -->
+            <h2 class="font-bold text-lg mb-2">Unlock Content</h2>
+            <div id="files-grid" class="grid grid-cols-1 gap-4 pb-4">
+                <div class="text-center py-10"><span class="loader"></span></div>
+            </div>
+        </div>
 
-    window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); }
+        <!-- 2. EARN VIEW (Monetag SDK) -->
+        <div id="view-earn" class="view-section hidden">
+            <div class="text-center mb-6 mt-2">
+                <h2 class="text-2xl font-bold">Watch & Earn</h2>
+                <p class="text-xs text-gray-500">Watch full ads to earn reward</p>
+                <div class="mt-2 inline-block bg-purple-100 px-3 py-1 rounded-full text-purple-700 text-xs font-bold">
+                    Daily Limit: <span id="daily-watched">0</span>/<span id="daily-limit">0</span>
+                </div>
+            </div>
 
-    fetchVideosFromFirebase();
-  </script>
-</body>
-</html>
+            <div class="glass-card rounded-2xl p-6 text-center mb-6">
+                <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl mb-4 shadow-lg"><i class="fas fa-play"></i></div>
+                <h3 class="text-xl font-bold">Video Ad Task</h3>
+                <p class="text-sm text-gray-500 mb-4">Reward: <span class="font-bold text-green-600">৳<span id="ad-reward-amount">0.00</span></span></p>
+                <button id="btn-watch-earn" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-gray-800 transition">Start Watching</button>
+            </div>
+        </div>
+
+        <!-- 3. TASKS VIEW -->
+        <div id="view-tasks" class="view-section hidden">
+            <h2 class="text-2xl font-bold text-center mb-4">Daily Tasks</h2>
+            <div id="task-list" class="space-y-3"></div>
+        </div>
+
+        <!-- 4. REFERRAL VIEW -->
+        <div id="view-referral" class="view-section hidden">
+            <div class="bg-gradient-main rounded-2xl p-6 text-white text-center shadow-xl mb-6">
+                <i class="fas fa-gift text-4xl mb-3 opacity-80"></i>
+                <h2 class="text-2xl font-bold">Invite Friends</h2>
+                <p class="text-purple-100 text-sm">Earn ৳<span id="ref-bonus-amount">0</span> per friend!</p>
+            </div>
+            
+            <div class="glass-card p-4 rounded-xl mb-6">
+                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Your Invite Link</label>
+                <div class="flex mt-2 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                    <input type="text" id="ref-link" readonly class="w-full bg-transparent p-3 text-sm text-gray-600 outline-none" value="Loading...">
+                    <button onclick="copyRefLink()" class="bg-gray-900 text-white px-5 text-sm font-bold">Copy</button>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="text-gray-500 text-sm">Total Referred</p>
+                <p class="text-3xl font-bold text-purple-600" id="total-ref-count">0</p>
+            </div>
+        </div>
+
+        <!-- 5. PROFILE VIEW -->
+        <div id="view-profile" class="view-section hidden">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto bg-gradient-main rounded-full mb-2 flex items-center justify-center text-white text-3xl shadow-lg">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 id="profile-name" class="font-bold text-lg">...</h2>
+                <p id="profile-uid" class="text-xs text-gray-500">ID: ...</p>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-500"></i> Withdraw</h3>
+                
+                <div id="withdraw-alert" class="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-xs mb-3 hidden">
+                    <i class="fas fa-exclamation-triangle"></i> You need <span id="req-ref">0</span> referrals to withdraw. You have <span id="cur-ref">0</span>.
+                </div>
+
+                <div class="space-y-3">
+                    <select id="withdraw-method" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
+                        <option value="bkash">Bkash</option>
+                        <option value="nagad">Nagad</option>
+                        <option value="usdt">USDT (BEP20)</option>
+                    </select>
+                    <input type="text" id="withdraw-account" placeholder="Wallet / Number" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
+                    <input type="number" id="withdraw-amount" placeholder="Amount (Taka)" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
+                    <button onclick="handleWithdraw()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg">Submit Request</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-sm mb-2">Withdraw History</h3>
+                <div id="withdraw-history" class="space-y-2"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="fixed bottom-4 left-4 right-4 bg-gray-900/90 backdrop-blur-md text-white rounded-2xl h-16 flex justify-around items-center shadow-2xl z-50">
+        <button onclick="switchView('home')" class="nav-item active" data-target="home"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="switchView('earn')" class="nav-item" data-target="earn"><i class="fas fa-coins text-xl"></i></button>
+        <button onclick="switchView('tasks')" class="nav-item" data-target="tasks"><i class="fas fa-check-circle text-xl"></i></button>
+        <button onclick="switchView('referral')" class="nav-item" data-target="referral"><i class="fas fa-users text-xl"></i></button>
+        <button onclick="switchView('profile')" class="nav-item" data-target="profile"><i class="fas fa-user text-xl"></i></button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-3 px-6 rounded-full shadow-2xl opacity-0 transition-all z-[60]">
+        <p id="toast-message" class="text-sm font-medium"></p>
+    </div>
+
+    <script>
+        // --- Firebase Config ---
+        const firebaseConfig = {
+    apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
+    authDomain: "first-app-c33be.firebaseapp.com",
+    databaseURL: "https://first-app-c33be-default-rtdb.firebaseio.com",
+    projectId: "first-app-c33be",
+    storageBucket: "first-app-c33be.firebasestorage.app",
+    messagingSenderId: "179840421702",
+    appId: "1:179840421702:web:2540c2b4ee48baec849f47",
+    measurementId: "G-VCMH0W3MJP"
+};
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let currentUser = {
+            id: tg.initDataUnsafe?.user?.id || "guest_123",
+            first_name: tg.initDataUnsafe?.user?.first_name || "Guest",
+            username: tg.initDataUnsafe?.user?.username || ""
+        };
+
+        let appSettings = {};
+        let userData = {};
+        let monetagScriptInjected = false;
+
+        // --- Initialization ---
+        function initApp() {
+            db.ref('settings').on('value', snap => {
+                appSettings = snap.val() || {};
+                
+                document.getElementById('ad-reward-amount').innerText = appSettings.adReward || 0;
+                document.getElementById('daily-limit').innerText = appSettings.dailyLimit || 0;
+                document.getElementById('ref-bonus-amount').innerText = appSettings.refBonus || 0;
+                
+                const botName = appSettings.botUsername || "YourBot";
+                document.getElementById('ref-link').value = `https://t.me/${botName}/app?startapp=ref_${currentUser.id}`;
+
+                if(appSettings.homeBannerImg) {
+                    const bannerCont = document.getElementById('home-banner-container');
+                    document.getElementById('home-banner-img').src = appSettings.homeBannerImg;
+                    bannerCont.classList.remove('hidden');
+                }
+
+                if(appSettings.monetagZoneId && !monetagScriptInjected) {
+                    const script = document.createElement('script');
+                    script.src = '//libtl.com/sdk.js';
+                    script.dataset.zone = appSettings.monetagZoneId;
+                    script.dataset.sdk = 'show_' + appSettings.monetagZoneId;
+                    document.head.appendChild(script);
+                    monetagScriptInjected = true;
+                }
+            });
+
+            const userRef = db.ref('users/' + currentUser.id);
+            userRef.on('value', async (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    let referrerId = null;
+                    const startParam = tg.initDataUnsafe?.start_param || "";
+                    if(startParam.startsWith("ref_")) {
+                        referrerId = startParam.split("_")[1];
+                        if(referrerId == currentUser.id) referrerId = null;
+                        
+                        if(referrerId) {
+                            const refUserSnap = await db.ref('users/' + referrerId).once('value');
+                            if(refUserSnap.exists()) {
+                                const refData = refUserSnap.val();
+                                const bonus = parseFloat(appSettings.refBonus || 0);
+                                db.ref('users/' + referrerId).update({
+                                    balance: (refData.balance || 0) + bonus,
+                                    ref_count: (refData.ref_count || 0) + 1
+                                });
+                            }
+                        }
+                    }
+                    const newUser = {
+                        first_name: currentUser.first_name,
+                        username: currentUser.username,
+                        balance: 0,
+                        daily_ads: 0,
+                        last_ad_date: new Date().toDateString(),
+                        ref_count: 0,
+                        referred_by: referrerId || "none"
+                    };
+                    userRef.set(newUser);
+                    userData = newUser;
+                } else {
+                    userData = data;
+                    if(userData.last_ad_date !== new Date().toDateString()) {
+                        userRef.update({ daily_ads: 0, last_ad_date: new Date().toDateString() });
+                    }
+                    updateUI();
+                }
+            });
+
+            loadContent();
+        }
+
+        function updateUI() {
+            document.getElementById('header-balance').innerText = (userData.balance || 0).toFixed(2);
+            document.getElementById('profile-header').innerText = userData.first_name;
+            document.getElementById('profile-name').innerText = userData.first_name;
+            document.getElementById('profile-uid').innerText = "ID: " + currentUser.id;
+            document.getElementById('daily-watched').innerText = userData.daily_ads || 0;
+            document.getElementById('total-ref-count').innerText = userData.ref_count || 0;
+            
+            const minRef = appSettings.minRefWithdraw || 0;
+            const curRef = userData.ref_count || 0;
+            document.getElementById('req-ref').innerText = minRef;
+            document.getElementById('cur-ref').innerText = curRef;
+            
+            if(curRef < minRef) document.getElementById('withdraw-alert').classList.remove('hidden');
+            else document.getElementById('withdraw-alert').classList.add('hidden');
+        }
+
+        function loadContent() {
+            db.ref('sliders').on('value', snap => {
+                const sliders = snap.val();
+                const cont = document.getElementById('slider-container');
+                cont.innerHTML = '';
+                if(sliders) Object.values(sliders).forEach(s => {
+                    cont.innerHTML += `<div class="min-w-full h-full"><img src="${s.url}" class="w-full h-full object-cover"></div>`;
+                });
+            });
+
+            db.ref('files').on('value', snap => {
+                const files = snap.val();
+                const grid = document.getElementById('files-grid');
+                grid.innerHTML = '';
+                if(files) Object.keys(files).forEach(key => renderFileCard(key, files[key], grid));
+                else grid.innerHTML = '<p class="text-center text-gray-500">No files found.</p>';
+            });
+
+            db.ref('tasks').on('value', snap => {
+                const tasks = snap.val();
+                const list = document.getElementById('task-list');
+                list.innerHTML = '';
+                if(tasks) Object.keys(tasks).forEach(key => {
+                    const t = tasks[key];
+                    list.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-sm text-gray-800">${t.title}</p>
+                            <p class="text-xs text-green-600 font-bold">+৳${t.reward}</p>
+                        </div>
+                        <button onclick="doTask('${key}', '${t.link}', ${t.reward})" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Start</button>
+                    </div>`;
+                });
+            });
+
+            db.ref('withdrawals').orderByChild('uid').equalTo(String(currentUser.id)).limitToLast(10).on('value', snap => {
+                const hist = document.getElementById('withdraw-history');
+                hist.innerHTML = '';
+                if(snap.val()) Object.values(snap.val()).reverse().forEach(w => {
+                    let color = w.status === 'paid' ? 'text-green-600' : w.status === 'rejected' ? 'text-red-600' : 'text-yellow-600';
+                    hist.innerHTML += `<div class="flex justify-between text-xs border-b pb-2"><span class="${color} font-bold uppercase">${w.status}</span> <span>${w.amount}৳ (${w.method})</span></div>`;
+                });
+            });
+        }
+
+        function renderFileCard(key, file, grid) {
+            const isUnlocked = localStorage.getItem(`unlocked_${key}`);
+            const count = parseInt(localStorage.getItem(`clicks_${key}`) || 0);
+            
+            grid.innerHTML += `
+            <div class="file-card bg-white rounded-2xl p-3 shadow-sm border flex gap-3 items-center">
+                <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src="${file.thumb}" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <h3 class="font-bold text-gray-800 text-sm truncate">${file.title}</h3>
+                    <p class="text-xs text-gray-500 mb-2 truncate">${file.desc || 'Click unlock to view'}</p>
+                    <button id="btn-${key}" onclick="handleUnlock('${key}', '${file.link}', ${file.reqAds})" class="w-full py-2 rounded-lg text-xs font-bold text-white transition ${isUnlocked ? 'bg-green-600' : 'bg-gray-900'}">
+                        ${isUnlocked ? '<i class="fas fa-download"></i> Download' : `<i class="fas fa-lock"></i> Unlock (${count}/${file.reqAds})`}
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        // Search Implementation
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.file-card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3').innerText.toLowerCase();
+                if (title.includes(term)) card.classList.remove('hidden');
+                else card.classList.add('hidden');
+            });
+        });
+
+        window.clickBanner = () => {
+            if(appSettings.homeBannerLink) window.open(appSettings.ho
