@@ -1,175 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Incam</title>
-    <!-- Dependencies -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Adsgram SDK -->
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-    
-    <!-- Telegram SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Viral Zone</title>
 
-    <style>
-        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
-        .bg-gradient-main { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); }
-        .loader { width: 24px; height: 24px; border: 3px solid #e5e7eb; border-bottom-color: #7c3aed; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .nav-item.active i, .nav-item.active span { color: #7c3aed; }
-        .hidden { display: none !important; }
-    </style>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- TELEGRAM WEB APP SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- ADSGRAM SCRIPT -->
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+<style>
+/* --- DESIGN SYSTEM --- */
+:root { --primary: #8b5cf6; --primary-gradient: linear-gradient(135deg, #8b5cf6, #ec4899); --bg-main: #0f0f23; --bg-card: #1a1a2e; --bg-nav: rgba(30, 30, 48, 0.95); --text-main: #ffffff; --text-muted: #9ca3af; --border: 1px solid rgba(255,255,255,0.08); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg-main); color: var(--text-main); font-family: 'Poppins', 'Hind Siliguri', sans-serif; padding-bottom: 90px; }
+.app { max-width: 500px; margin: 0 auto; padding: 12px; }
+
+.header { background: linear-gradient(to bottom, #1e1e30, #151525); padding: 20px; border-radius: 16px; text-align: center; border: var(--border); margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.title { font-size: 26px; font-weight: 800; color: #a855f7; margin: 0; letter-spacing: 1px; }
+.subtitle { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+
+.search-wrapper { position: relative; margin-bottom: 15px; }
+.search-input { width: 100%; padding: 14px 20px; padding-right: 50px; border-radius: 50px; background: #232336; border: var(--border); color: white; font-size: 14px; outline: none; transition: 0.3s; }
+.search-input:focus { border-color: #8b5cf6; background: #2a2a40; }
+.search-icon { position: absolute; right: 5px; top: 5px; background: var(--primary); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
+
+.filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 15px; scrollbar-width: none; }
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-btn { position: relative; padding: 8px 18px; background: var(--bg-card); border: var(--border); color: #ccc; border-radius: 50px; font-size: 13px; white-space: nowrap; cursor: pointer; margin-top: 8px; margin-right: 5px; }
+.filter-btn.active { background: var(--primary-gradient); color: white; border: none; padding: 9px 19px; }
+.badge { position: absolute; top: -6px; right: -2px; background: #ef4444; color: white; font-size: 9px; font-weight: bold; height: 18px; min-width: 18px; padding: 0 4px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-main); z-index: 10; }
+
+.cards { display: flex; flex-direction: column; gap: 15px; }
+.card { background: var(--bg-card); border-radius: 16px; overflow: hidden; border: var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.banner-wrapper { width: 100%; overflow: hidden; border-radius: 12px; margin: 5px 0; text-align: center; background: #000; }
+.banner-wrapper img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.media { position: relative; padding-bottom: 56.25%; background: black; }
+.media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.heart-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border: none; color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+.meta { padding: 15px; }
+
+/* Meta Header for Title and View Count */
+.meta-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.meta h3 { margin: 0; font-size: 16px; line-height: 1.4; font-weight: 600; flex: 1; }
+.view-count-badge { font-size: 11px; color: #9ca3af; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 5px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.05); }
+
+.actions { display: flex; gap: 10px; }
+.unlock-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--primary-gradient); color: white; font-weight: 700; font-size: 13px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.unlock-btn.done { background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+.link-btn { width: 45px; background: #2d2d44; border: var(--border); border-radius: 10px; color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+.info-box { background: var(--bg-card); border-radius: 16px; padding: 20px; border: var(--border); margin-bottom: 15px; }
+.step { display: flex; gap: 15px; margin-bottom: 15px; }
+.step-num { background: #2d2d44; color: #a855f7; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; flex-shrink: 0; }
+
+/* BOTTOM NAV */
+.bottom-nav { 
+    position: fixed; bottom: 10px; left: 10px; right: 10px; 
+    background: var(--bg-nav); backdrop-filter: blur(10px); 
+    border-radius: 20px; border: var(--border); 
+    display: flex; justify-content: space-around; 
+    padding: 8px 12px; max-width: 500px; margin: 0 auto; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 100; 
+}
+.nav-item { 
+    background: none; border: none; color: #6b7280; 
+    cursor: pointer; position: relative; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; width: auto; height: auto;
+}
+.nav-item i { font-size: 18px; transition: 0.3s; }
+.nav-text { font-size: 10px; font-weight: 500; font-family: 'Hind Siliguri', sans-serif; }
+.nav-item.active { color: #ec4899; }
+.nav-item.active i { transform: translateY(-2px); }
+.nav-item.active::after { 
+    content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); 
+    width: 4px; height: 4px; background: #ec4899; border-radius: 50%; 
+}
+
+/* LOADING OVERLAY */
+.loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.9); z-index: 999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    display: none;
+}
+.loader { border: 4px solid #f3f3f3; border-top: 4px solid #a855f7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 8px 20px; border-radius: 50px; font-size: 12px; font-weight: 600; display: none; z-index: 200; }
+.single-view { position: fixed; inset: 0; background: var(--bg-main); z-index: 150; overflow-y: auto; padding: 15px; display: none; }
+.single-view.active { display: block; }
+.hidden { display: none; }
+.fadeIn { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+</style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
 
-    <!-- Header -->
-    <div class="fixed top-0 w-full z-40 bg-white/90 backdrop-blur-md shadow-sm px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-main flex items-center justify-center text-white shadow-lg"><i class="fas fa-wallet"></i></div>
-            <div>
-                <p class="text-[10px] text-gray-500 font-semibold uppercase">My Balance</p>
-                <p class="text-lg font-bold leading-none text-gray-800">৳<span id="header-balance">0.00</span></p>
-            </div>
-        </div>
-        <div id="profile-header" class="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold">Loading...</div>
+<div class="app">
+    <!-- OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader"></div>
+        <div id="loadingText" style="color:white; font-size:16px; font-weight:bold;">Processing...</div>
+        <div id="loadingSub" style="color:#aaa; font-size:12px; margin-top:5px;">Please do not close</div>
     </div>
 
-    <!-- Main Content -->
-    <div id="app" class="container mx-auto px-4 mt-20 max-w-md">
-
-        <!-- 1. HOME VIEW -->
-        <div id="view-home" class="view-section">
-            <div class="mb-4">
-                <h1 class="text-2xl font-bold mb-1">Bachelor <span class="text-purple-600">Files</span></h1>
-                <input type="text" id="searchInput" placeholder="Search files..." class="w-full bg-white px-4 py-3 rounded-xl shadow-sm border border-gray-100 mt-2 outline-none focus:border-purple-500">
-            </div>
-
-            <!-- Banner Ad -->
-            <div id="home-banner-container" class="mb-4 hidden rounded-xl overflow-hidden shadow-sm" onclick="clickBanner()">
-                <img id="home-banner-img" src="" class="w-full h-auto object-cover">
-            </div>
-
-            <!-- Slider -->
-            <div id="slider-container" class="w-full h-40 rounded-2xl overflow-hidden shadow-lg mb-6 flex overflow-x-auto snap-x no-scrollbar bg-gray-200">
-                <!-- Sliders dynamic -->
-            </div>
-
-            <!-- Files Grid -->
-            <h2 class="font-bold text-lg mb-2">Unlock Content</h2>
-            <div id="files-grid" class="grid grid-cols-1 gap-4 pb-4">
-                <div class="text-center py-10"><span class="loader"></span></div>
-            </div>
-        </div>
-
-        <!-- 2. EARN VIEW (Monetag SDK) -->
-        <div id="view-earn" class="view-section hidden">
-            <div class="text-center mb-6 mt-2">
-                <h2 class="text-2xl font-bold">Watch & Earn</h2>
-                <p class="text-xs text-gray-500">Watch full ads to earn reward</p>
-                <div class="mt-2 inline-block bg-purple-100 px-3 py-1 rounded-full text-purple-700 text-xs font-bold">
-                    Daily Limit: <span id="daily-watched">0</span>/<span id="daily-limit">0</span>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-6 text-center mb-6">
-                <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl mb-4 shadow-lg"><i class="fas fa-play"></i></div>
-                <h3 class="text-xl font-bold">Video Ad Task</h3>
-                <p class="text-sm text-gray-500 mb-4">Reward: <span class="font-bold text-green-600">৳<span id="ad-reward-amount">0.00</span></span></p>
-                <button id="btn-watch-earn" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-gray-800 transition">Start Watching</button>
-            </div>
-        </div>
-
-        <!-- 3. TASKS VIEW -->
-        <div id="view-tasks" class="view-section hidden">
-            <h2 class="text-2xl font-bold text-center mb-4">Daily Tasks</h2>
-            <div id="task-list" class="space-y-3"></div>
-        </div>
-
-        <!-- 4. REFERRAL VIEW -->
-        <div id="view-referral" class="view-section hidden">
-            <div class="bg-gradient-main rounded-2xl p-6 text-white text-center shadow-xl mb-6">
-                <i class="fas fa-gift text-4xl mb-3 opacity-80"></i>
-                <h2 class="text-2xl font-bold">Invite Friends</h2>
-                <p class="text-purple-100 text-sm">Earn ৳<span id="ref-bonus-amount">0</span> per friend!</p>
-            </div>
-            
-            <div class="glass-card p-4 rounded-xl mb-6">
-                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Your Invite Link</label>
-                <div class="flex mt-2 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                    <input type="text" id="ref-link" readonly class="w-full bg-transparent p-3 text-sm text-gray-600 outline-none" value="Loading...">
-                    <button onclick="copyRefLink()" class="bg-gray-900 text-white px-5 text-sm font-bold">Copy</button>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <p class="text-gray-500 text-sm">Total Referred</p>
-                <p class="text-3xl font-bold text-purple-600" id="total-ref-count">0</p>
-            </div>
-        </div>
-
-        <!-- 5. PROFILE VIEW -->
-        <div id="view-profile" class="view-section hidden">
-            <div class="text-center mb-6">
-                <div class="w-20 h-20 mx-auto bg-gradient-main rounded-full mb-2 flex items-center justify-center text-white text-3xl shadow-lg">
-                    <i class="fas fa-user"></i>
-                </div>
-                <h2 id="profile-name" class="font-bold text-lg">...</h2>
-                <p id="profile-uid" class="text-xs text-gray-500">ID: ...</p>
-            </div>
-            
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
-                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-500"></i> Withdraw</h3>
-                
-                <div id="withdraw-alert" class="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-xs mb-3 hidden">
-                    <i class="fas fa-exclamation-triangle"></i> You need <span id="req-ref">0</span> referrals to withdraw. You have <span id="cur-ref">0</span>.
-                </div>
-
-                <div class="space-y-3">
-                    <select id="withdraw-method" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
-                        <option value="bkash">Bkash</option>
-                        <option value="nagad">Nagad</option>
-                        <option value="usdt">USDT (BEP20)</option>
-                    </select>
-                    <input type="text" id="withdraw-account" placeholder="Wallet / Number" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
-                    <input type="number" id="withdraw-amount" placeholder="Amount (Taka)" class="w-full p-3 bg-gray-50 border rounded-xl outline-none">
-                    <button onclick="handleWithdraw()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg">Submit Request</button>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow-sm">
-                <h3 class="font-bold text-sm mb-2">Withdraw History</h3>
-                <div id="withdraw-history" class="space-y-2"></div>
-            </div>
-        </div>
-
+    <!-- SINGLE VIEW -->
+    <div id="singleView" class="single-view">
+        <button onclick="closeSingle()" style="background:#2d2d44; color:white; border:none; padding:10px 20px; border-radius:50px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-arrow-left"></i> ফিরে যান
+        </button>
+        <div id="singleCardContainer"></div>
     </div>
 
-    <!-- Navigation -->
-    <div class="fixed bottom-4 left-4 right-4 bg-gray-900/90 backdrop-blur-md text-white rounded-2xl h-16 flex justify-around items-center shadow-2xl z-50">
-        <button onclick="switchView('home')" class="nav-item active" data-target="home"><i class="fas fa-home text-xl"></i></button>
-        <button onclick="switchView('earn')" class="nav-item" data-target="earn"><i class="fas fa-coins text-xl"></i></button>
-        <button onclick="switchView('tasks')" class="nav-item" data-target="tasks"><i class="fas fa-check-circle text-xl"></i></button>
-        <button onclick="switchView('referral')" class="nav-item" data-target="referral"><i class="fas fa-users text-xl"></i></button>
-        <button onclick="switchView('profile')" class="nav-item" data-target="profile"><i class="fas fa-user text-xl"></i></button>
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+        <div class="header">
+            <h1 class="title"> VIRAL ZONE VIDEO<i class="fas fa-fire" style="color:#ec4899"></i></h1>
+            <div class="subtitle">Exclusive Premium Video </div>
+        </div>
+
+        <div id="homeSec" class="fadeIn">
+            <div class="search-wrapper">
+                <input id="searchInput" type="text" class="search-input" placeholder="ভিডিও খুঁজুন...">
+                <div class="search-icon"><i class="fas fa-search"></i></div>
+            </div>
+            <div id="filterContainer" class="filter-scroll"></div>
+            <div id="cards" class="cards">
+                <div style="text-align:center; padding:30px; color:#666"><i class="fas fa-circle-notch fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+
+        <div id="likedSec" class="hidden fadeIn">
+            <h3 style="color:#ec4899; margin-left:5px;">❤️ পছন্দের ভিডিও</h3>
+            <div id="likedCards" class="cards"></div>
+        </div>
+
+        <div id="tutSec" class="hidden fadeIn">
+            <h3 style="color:#a855f7; margin-left:5px;">🎥 টিউটোরিয়াল</h3>
+            <div class="info-box">
+                <div id="tutEmbed" style="width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; margin-bottom:20px;"></div>
+                <div class="step"><div class="step-num">১</div><div style="font-size:13px; color:#ddd;">UNLOCK বাটনে ক্লিক করুন।</div></div>
+                <div class="step"><div class="step-num">২</div><div style="font-size:13px; color:#ddd;">৩টি অ্যাড আসবে, ওই অ্যাড গুলো সম্পূর্ণভাবে দেখুন।</div></div>
+                <div class="step"><div class="step-num">৩</div><div style="font-size:13px; color:#ddd;">শেষে ৫ সেকেন্ড অপেক্ষা করলে আনলক হবে।</div></div>
+            </div>
+        </div>
+
+        <div id="linkSec" class="hidden fadeIn">
+            <h3 style="color:#a855f7; margin-left:5px;">🔗 প্রয়োজনীয় লিংক</h3>
+            <div id="linkList" class="cards"></div>
+        </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-3 px-6 rounded-full shadow-2xl opacity-0 transition-all z-[60]">
-        <p id="toast-message" class="text-sm font-medium"></p>
+    <!-- UPDATED BOTTOM NAV -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="nav('homeSec', this)">
+            <i class="fas fa-home"></i>
+            <span class="nav-text">হোম</span>
+        </button>
+        <button class="nav-item" onclick="nav('likedSec', this)">
+            <i class="fas fa-heart"></i>
+            <span class="nav-text">পছন্দ</span>
+        </button>
+        <button class="nav-item" onclick="nav('tutSec', this)">
+            <i class="fas fa-book-open"></i>
+            <span class="nav-text">টিউটোরিয়াল</span>
+        </button>
+        <button class="nav-item" onclick="nav('linkSec', this)">
+            <i class="fas fa-link"></i>
+            <span class="nav-text">লিংক</span>
+        </button>
     </div>
+    <div id="toast" class="toast">Link Copied!</div>
+</div>
 
-    <script>
-        // --- Firebase Config ---
-        const firebaseConfig = {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+const firebaseConfig = {
     apiKey: "AIzaSyBEgPmBYdu0hxRY6qilp0Aw6qIhL7FrnoM",
     authDomain: "first-app-c33be.firebaseapp.com",
     databaseURL: "https://first-app-c33be-default-rtdb.firebaseio.com",
@@ -180,185 +196,199 @@
     measurementId: "G-VCMH0W3MJP"
 };
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const tg = window.Telegram.WebApp; tg.expand();
+const currentUserId = tg.initDataUnsafe?.user?.id || Math.floor(Math.random() * 90000000) + 10000000;
 
-        let currentUser = {
-            id: tg.initDataUnsafe?.user?.id || "guest_123",
-            first_name: tg.initDataUnsafe?.user?.first_name || "Guest",
-            username: tg.initDataUnsafe?.user?.username || ""
-        };
+let allVideos=[], filters=[], menuLinks=[];
+let adsgramIds=[], bannerAds=[]; 
+let settings={ ads_limit: 20, bot_app_link: "", monetag_id: "" };
+let currentFilter = 'all';
+let monetagLoaded = false;
 
-        let appSettings = {};
-        let userData = {};
-        let monetagScriptInjected = false;
-
-        // --- Initialization ---
-        function initApp() {
-            db.ref('settings').on('value', snap => {
-                appSettings = snap.val() || {};
-                
-                document.getElementById('ad-reward-amount').innerText = appSettings.adReward || 0;
-                document.getElementById('daily-limit').innerText = appSettings.dailyLimit || 0;
-                document.getElementById('ref-bonus-amount').innerText = appSettings.refBonus || 0;
-                
-                const botName = appSettings.botUsername || "YourBot";
-                document.getElementById('ref-link').value = `https://t.me/${botName}/app?startapp=ref_${currentUser.id}`;
-
-                if(appSettings.homeBannerImg) {
-                    const bannerCont = document.getElementById('home-banner-container');
-                    document.getElementById('home-banner-img').src = appSettings.homeBannerImg;
-                    bannerCont.classList.remove('hidden');
-                }
-
-                if(appSettings.monetagZoneId && !monetagScriptInjected) {
-                    const script = document.createElement('script');
-                    script.src = '//libtl.com/sdk.js';
-                    script.dataset.zone = appSettings.monetagZoneId;
-                    script.dataset.sdk = 'show_' + appSettings.monetagZoneId;
-                    document.head.appendChild(script);
-                    monetagScriptInjected = true;
-                }
-            });
-
-            const userRef = db.ref('users/' + currentUser.id);
-            userRef.on('value', async (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    let referrerId = null;
-                    const startParam = tg.initDataUnsafe?.start_param || "";
-                    if(startParam.startsWith("ref_")) {
-                        referrerId = startParam.split("_")[1];
-                        if(referrerId == currentUser.id) referrerId = null;
-                        
-                        if(referrerId) {
-                            const refUserSnap = await db.ref('users/' + referrerId).once('value');
-                            if(refUserSnap.exists()) {
-                                const refData = refUserSnap.val();
-                                const bonus = parseFloat(appSettings.refBonus || 0);
-                                db.ref('users/' + referrerId).update({
-                                    balance: (refData.balance || 0) + bonus,
-                                    ref_count: (refData.ref_count || 0) + 1
-                                });
-                            }
-                        }
-                    }
-                    const newUser = {
-                        first_name: currentUser.first_name,
-                        username: currentUser.username,
-                        balance: 0,
-                        daily_ads: 0,
-                        last_ad_date: new Date().toDateString(),
-                        ref_count: 0,
-                        referred_by: referrerId || "none"
-                    };
-                    userRef.set(newUser);
-                    userData = newUser;
-                } else {
-                    userData = data;
-                    if(userData.last_ad_date !== new Date().toDateString()) {
-                        userRef.update({ daily_ads: 0, last_ad_date: new Date().toDateString() });
-                    }
-                    updateUI();
-                }
-            });
-
-            loadContent();
-        }
-
-        function updateUI() {
-            document.getElementById('header-balance').innerText = (userData.balance || 0).toFixed(2);
-            document.getElementById('profile-header').innerText = userData.first_name;
-            document.getElementById('profile-name').innerText = userData.first_name;
-            document.getElementById('profile-uid').innerText = "ID: " + currentUser.id;
-            document.getElementById('daily-watched').innerText = userData.daily_ads || 0;
-            document.getElementById('total-ref-count').innerText = userData.ref_count || 0;
+function init() {
+    // সেটিংস লোড
+    onValue(ref(db, 'settings'), s => { 
+        if(s.val()) {
+            settings = s.val();
+            if(settings.tutorial_id) document.getElementById('tutEmbed').innerHTML=`<iframe src="${settings.tutorial_id}" style="width:100%;height:100%;border:0" allowfullscreen></iframe>`;
             
-            const minRef = appSettings.minRefWithdraw || 0;
-            const curRef = userData.ref_count || 0;
-            document.getElementById('req-ref').innerText = minRef;
-            document.getElementById('cur-ref').innerText = curRef;
-            
-            if(curRef < minRef) document.getElementById('withdraw-alert').classList.remove('hidden');
-            else document.getElementById('withdraw-alert').classList.add('hidden');
+            // মনেট্যাগ অ্যাড লোড
+            if(settings.monetag_id && !monetagLoaded) {
+                const script = document.createElement('script');
+                script.src = '//libtl.com/sdk.js';
+                script.dataset.zone = settings.monetag_id;
+                script.dataset.sdk = 'show_' + settings.monetag_id;
+                document.head.appendChild(script);
+                monetagLoaded = true;
+            }
         }
+    });
 
-        function loadContent() {
-            db.ref('sliders').on('value', snap => {
-                const sliders = snap.val();
-                const cont = document.getElementById('slider-container');
-                cont.innerHTML = '';
-                if(sliders) Object.values(sliders).forEach(s => {
-                    cont.innerHTML += `<div class="min-w-full h-full"><img src="${s.url}" class="w-full h-full object-cover"></div>`;
-                });
-            });
-
-            db.ref('files').on('value', snap => {
-                const files = snap.val();
-                const grid = document.getElementById('files-grid');
-                grid.innerHTML = '';
-                if(files) Object.keys(files).forEach(key => renderFileCard(key, files[key], grid));
-                else grid.innerHTML = '<p class="text-center text-gray-500">No files found.</p>';
-            });
-
-            db.ref('tasks').on('value', snap => {
-                const tasks = snap.val();
-                const list = document.getElementById('task-list');
-                list.innerHTML = '';
-                if(tasks) Object.keys(tasks).forEach(key => {
-                    const t = tasks[key];
-                    list.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-sm text-gray-800">${t.title}</p>
-                            <p class="text-xs text-green-600 font-bold">+৳${t.reward}</p>
-                        </div>
-                        <button onclick="doTask('${key}', '${t.link}', ${t.reward})" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Start</button>
-                    </div>`;
-                });
-            });
-
-            db.ref('withdrawals').orderByChild('uid').equalTo(String(currentUser.id)).limitToLast(10).on('value', snap => {
-                const hist = document.getElementById('withdraw-history');
-                hist.innerHTML = '';
-                if(snap.val()) Object.values(snap.val()).reverse().forEach(w => {
-                    let color = w.status === 'paid' ? 'text-green-600' : w.status === 'rejected' ? 'text-red-600' : 'text-yellow-600';
-                    hist.innerHTML += `<div class="flex justify-between text-xs border-b pb-2"><span class="${color} font-bold uppercase">${w.status}</span> <span>${w.amount}৳ (${w.method})</span></div>`;
-                });
-            });
+    // অ্যাডস কনফিগারেশন লোড
+    onValue(ref(db, 'ads_config'), s => { 
+        adsgramIds = []; bannerAds = [];
+        if(s.val()) {
+            if(s.val().interstitial_ids) Object.values(s.val().interstitial_ids).forEach(id => adsgramIds.push(id));
+            if(s.val().banners) Object.values(s.val().banners).forEach(b => bannerAds.push(b));
         }
+        renderCards(); // অ্যাড লোড হলে আবার রেন্ডার হবে
+    });
 
-        function renderFileCard(key, file, grid) {
-            const isUnlocked = localStorage.getItem(`unlocked_${key}`);
-            const count = parseInt(localStorage.getItem(`clicks_${key}`) || 0);
-            
-            grid.innerHTML += `
-            <div class="file-card bg-white rounded-2xl p-3 shadow-sm border flex gap-3 items-center">
-                <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                    <img src="${file.thumb}" class="w-full h-full object-cover">
+    // লিংক এবং ফিল্টার লোড
+    onValue(ref(db, 'links'), s => { menuLinks=[]; if(s.val()) Object.values(s.val()).forEach(v=>menuLinks.push(v)); renderLinks(); });
+    onValue(ref(db, 'filters'), s => { filters=[]; if(s.val()) Object.values(s.val()).forEach(v=>filters.push(v)); });
+
+    // ভিডিও লোড এবং ডিপ লিংক হ্যান্ডলিং (FIXED)
+    onValue(ref(db, 'videos'), s => {
+        allVideos = [];
+        if(s.val()) Object.entries(s.val()).forEach(([k,v])=>allVideos.push({id:k,...v}));
+        allVideos.reverse();
+        
+        renderFilters();
+        renderCards(); // আগে সব ভিডিও দেখাবে
+        renderLiked();
+
+        // এরপর চেক করবে লিংক আছে কিনা
+        checkDeepLink();
+    });
+}
+
+// ডিপ লিংক চেক করার ফাংশন (শেয়ার করা লিংক কাজ করার জন্য)
+function checkDeepLink() {
+    const startParam = tg.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('file');
+    
+    if(startParam) {
+        let videoId = startParam.split('_')[0];
+        // ভিডিওটি ডাটাবেসে আছে কিনা চেক করা
+        const targetVideo = allVideos.find(v => v.id === videoId);
+        
+        if(targetVideo) {
+            console.log("Opening shared video:", videoId);
+            openSingle(videoId);
+        } else {
+            console.log("Shared video not found in database.");
+            showToast("ভিডিওটি খুঁজে পাওয়া যায়নি!");
+        }
+    }
+}
+
+function getCount(cat) { return cat === 'all' ? allVideos.length : allVideos.filter(v => v.category === cat).length; }
+
+function renderFilters() {
+    const div = document.getElementById('filterContainer');
+    let html = `<button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="setFilter('all', this)">All <span class="badge">${getCount('all')}</span></button>`;
+    filters.forEach(f => {
+        html += `<button class="filter-btn ${currentFilter===f.id?'active':''}" onclick="setFilter('${f.id}', this)">${f.name} <span class="badge">${getCount(f.id)}</span></button>`;
+    });
+    div.innerHTML = html;
+}
+
+function renderCards() {
+    const div = document.getElementById('cards');
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const list = allVideos.filter(v => (v.name.toLowerCase().includes(q)) && (currentFilter==='all' || v.category===currentFilter));
+    
+    div.innerHTML = list.length ? '' : '<p style="text-align:center;color:#666;margin-top:20px;">কোনো ভিডিও পাওয়া যায়নি</p>';
+    
+    list.forEach((v, index) => {
+        div.appendChild(createCard(v));
+        if ((index + 1) % 2 === 0 && bannerAds.length > 0) {
+            const bannerDiv = document.createElement('div');
+            bannerDiv.className = 'banner-wrapper';
+            bannerDiv.innerHTML = bannerAds[Math.floor(Math.random() * bannerAds.length)];
+            div.appendChild(bannerDiv);
+        }
+    });
+}
+
+function createCard(v) {
+    const liked = getLiked().includes(v.id);
+    const count = getProgress(v.id);
+    const req = v.ad_watches_required || 1;
+    const isUnlocked = count >= req;
+    const views = v.view_count || 0;
+
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+        <div class="media">
+            <img src="${v.image_url}" onerror="this.src='https://via.placeholder.com/400'">
+            <button class="heart-btn" onclick="toggleLike('${v.id}')"><i class="${liked?'fas':'far'} fa-heart" style="color:${liked?'#ec4899':'white'}"></i></button>
+        </div>
+        <div class="meta">
+            <div class="meta-header">
+                <h3>${v.name}</h3>
+                <div class="view-count-badge">
+                    <i class="fas fa-eye"></i> ${views}
                 </div>
-                <div class="flex-1 overflow-hidden">
-                    <h3 class="font-bold text-gray-800 text-sm truncate">${file.title}</h3>
-                    <p class="text-xs text-gray-500 mb-2 truncate">${file.desc || 'Click unlock to view'}</p>
-                    <button id="btn-${key}" onclick="handleUnlock('${key}', '${file.link}', ${file.reqAds})" class="w-full py-2 rounded-lg text-xs font-bold text-white transition ${isUnlocked ? 'bg-green-600' : 'bg-gray-900'}">
-                        ${isUnlocked ? '<i class="fas fa-download"></i> Download' : `<i class="fas fa-lock"></i> Unlock (${count}/${file.reqAds})`}
-                    </button>
-                </div>
-            </div>`;
+            </div>
+            <div class="actions">
+                <button class="unlock-btn ${isUnlocked?'done':''}" onclick="handleUnlock('${v.id}', '${v.download_link}', ${req})">
+                    ${isUnlocked ? '<i class="fas fa-download"></i> DOWNLOAD' : `<i class="fas fa-play"></i> UNLOCK (${count}/${req})`}
+                </button>
+                <button class="link-btn" onclick="copyLink('${v.id}')"><i class="fas fa-link"></i></button>
+            </div>
+        </div>`;
+    return el;
+}
+
+window.copyLink = (id) => {
+    const botLink = settings.bot_app_link || "";
+    // বট লিংক না থাকলে ওয়েব লিংক কপি হবে
+    if(!botLink) { 
+        const url = window.location.origin + window.location.pathname + '?file=' + id;
+        navigator.clipboard.writeText(url); 
+        showToast("Web Link Copied!"); 
+        return; 
+    }
+    // টেলিগ্রাম লিংক জেনারেট
+    const tgLink = `${botLink}?startapp=${id}_${currentUserId}`;
+    navigator.clipboard.writeText(tgLink);
+    showToast("Share Link Copied!");
+}
+
+window.handleUnlock = (id, link, req) => {
+    const count = getProgress(id);
+    if(count >= req) { window.open(link, '_blank'); return; }
+    if(getDaily() >= (settings.ads_limit||20)) { showToast("Daily limit reached!"); return; }
+    if(adsgramIds.length === 0) { alert("Admin: Add Adsgram IDs"); return; }
+
+    showOverlay("Processing...");
+    playMixedSequence(0, id, link, req);
+}
+
+function playMixedSequence(step, videoId, link, req) {
+    const txt = document.getElementById('loadingText');
+    if(step >= 3) {
+        startFinalCountdown(videoId, req);
+        return;
+    }
+    const delay = 500; 
+    setTimeout(() => {
+        if(step === 1) {
+            if(settings.monetag_id) {
+                txt.innerText = "Loading Partner Ad...";
+                const sdkFunc = window['show_' + settings.monetag_id];
+                if(typeof sdkFunc === 'function') {
+                    sdkFunc().then(() => playMixedSequence(step + 1, videoId, link, req))
+                           .catch(e => playMixedSequence(step + 1, videoId, link, req));
+                } else { playMixedSequence(step + 1, videoId, link, req); }
+            } else { playMixedSequence(step + 1, videoId, link, req); }
+        } 
+        else {
+            txt.innerText = "Loading Video Ad...";
+            if(window.Adsgram) {
+                const blockId = adsgramIds[step % adsgramIds.length];
+                const AdController = window.Adsgram.init({ blockId: blockId });
+                AdController.show().then((result) => playMixedSequence(step + 1, videoId, link, req))
+                            .catch((result) => playMixedSequence(step + 1, videoId, link, req));
+            } else { playMixedSequence(step + 1, videoId, link, req); }
         }
+    }, delay);
+}
 
-        // Search Implementation
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.file-card');
-            cards.forEach(card => {
-                const title = card.querySelector('h3').innerText.toLowerCase();
-                if (title.includes(term)) card.classList.remove('hidden');
-                else card.classList.add('hidden');
-            });
-        });
-
-        window.clickBanner = () => {
-            if(appSettings.homeBannerLink) window.open(appSettings.ho
+// ভিউ কাউন্ট বাড়ানোর ফাংশন
+function incrementViewCount(videoId) {
+    // চেক করবে ইউজার
